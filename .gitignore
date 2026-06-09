@@ -1,0 +1,73 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# database
+/prisma/db.sqlite
+/prisma/db.sqlite-journal
+db.sqlite
+
+# prisma
+/generated/prisma
+/prisma/migrations/*/migration_lock.toml
+
+# next.js
+/.next/
+/out/
+next-env.d.ts
+
+# production
+/build
+/dist
+
+# logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# local env files
+.env
+.env.*
+!.env.example
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+
+# vscode
+.vscode
+
+# idea files
+.idea
+
+# macOS
+.DS_Store
+
+# windows
+Thumbs.db
+
+# certificates
+*.pem
+
+# clerk configuration
+/.clerk/
+
+# turbo
+.turbo
+
+# upload/cache files
+.cache
+
+# temporary files
+tmp
+temp
+*.tmp
