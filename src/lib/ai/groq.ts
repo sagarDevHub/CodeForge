@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { protectRequest } from "../security/arcjet/arcjet-protect";
 
 const client = new OpenAI({
   apiKey: process.env.GROQ_API_KEY,
@@ -6,6 +7,7 @@ const client = new OpenAI({
 });
 
 export const aiSummariseCommit = async (diff: string) => {
+  await protectRequest();
   try {
     const response = await client.chat.completions.create({
       model: "llama-3.3-70b-versatile",

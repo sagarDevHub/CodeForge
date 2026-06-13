@@ -1,6 +1,12 @@
 import z from "zod";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
-import { pullCommits } from "@/lib/github";
+import { pullCommits } from "@/lib/github/github";
+import { TRPCError } from "@trpc/server";
+import {
+  createProjectRateLimit,
+  pullCommitsRateLimit,
+} from "@/lib/security/ratelimit/rate-limit";
+import { protectRequest } from "@/lib/security/arcjet/arcjet-protect";
 
 export const projectRouter = createTRPCRouter({
   createProject: protectedProcedure
@@ -12,6 +18,18 @@ export const projectRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const { success } = await createProjectRateLimit.limit(
+        `create-project:${ctx.user.userId}`,
+      );
+
+      if (!success) {
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: "Project creation limit exceeded. Try again later.",
+        });
+      }
+
+      await protectRequest();
       const project = await ctx.db.project.create({
         data: {
           githubUrl: input.githubUrl,
@@ -23,7 +41,7 @@ export const projectRouter = createTRPCRouter({
           },
         },
       });
-      await pullCommits(project.id);
+      await pullCommits(project.id, ctx.user.userId!);
       return project;
     }),
 
@@ -47,7 +65,38 @@ export const projectRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      pullCommits(input.projectId).catch(console.error);
+      await protectRequest();
+      const project = await ctx.db.project.findFirst({
+        where: {
+          id: input.projectId,
+          userToProjects: {
+            some: {
+              userId: ctx.user.userId!,
+            },
+          },
+        },
+      });
+
+      if (!project) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You do not have access to this project",
+        });
+      }
+
+      const { success } = await pullCommitsRateLimit.limit(
+        `Pull-commits: ${ctx.user.userId}`,
+      );
+
+      if (!success) {
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: "Commit sync limit exceeded. Try again later.",
+        });
+      }
+
+      pullCommits(input.projectId, ctx.user.userId!).catch(console.error);
+
       return await ctx.db.commit.findMany({
         where: {
           projectId: input.projectId,

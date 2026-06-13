@@ -1,7 +1,8 @@
 import { db } from "@/server/db";
 import { Octokit } from "octokit";
 import axios from "axios";
-import { aiSummariseCommit } from "./groq";
+import { aiSummariseCommit } from "../ai/groq";
+import { checkGroqLimit } from "../security/ratelimit/groq-gurard";
 
 export const octokit = new Octokit({
   auth: process.env.GITHUB_TOKEN,
@@ -43,7 +44,7 @@ export const getCommitHashes = async (
   }));
 };
 
-export const pullCommits = async (projectId: string) => {
+export const pullCommits = async (projectId: string, userId: string) => {
   const { project, githubUrl } = await fetchProjectGithubUrl(projectId);
   const commitHashes = await getCommitHashes(githubUrl);
   const unprocessedCommits = await filterUnprocessedCommits(
@@ -53,6 +54,7 @@ export const pullCommits = async (projectId: string) => {
   const summaries: string[] = [];
   for (const commit of unprocessedCommits) {
     try {
+      await checkGroqLimit(userId);
       console.log(`Summarising ${commit.commitHash}`);
       const summary = await summariseCommit(githubUrl, commit.commitHash);
       summaries.push(summary);
@@ -86,7 +88,16 @@ async function summariseCommit(githubUrl: string, commitHash: string) {
     },
   });
 
-  return (await aiSummariseCommit(data)) || "";
+  const MAX_DIFF_SIZE = 5000;
+
+  const truncatedDiff =
+    typeof data === "string" ? data.slice(0, MAX_DIFF_SIZE) : "";
+
+  if (!truncatedDiff.trim()) {
+    return "No meaningfull code changes detected.";
+  }
+
+  return await aiSummariseCommit(truncatedDiff);
 }
 
 async function fetchProjectGithubUrl(projectId: string) {
