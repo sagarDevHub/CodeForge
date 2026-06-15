@@ -7,6 +7,7 @@ import {
   pullCommitsRateLimit,
 } from "@/lib/security/ratelimit/rate-limit";
 import { protectRequest } from "@/lib/security/arcjet/arcjet-protect";
+import { indexGithubRepo } from "@/lib/github/github-loader";
 
 export const projectRouter = createTRPCRouter({
   createProject: protectedProcedure
@@ -41,6 +42,7 @@ export const projectRouter = createTRPCRouter({
           },
         },
       });
+      await indexGithubRepo(project.id, input.githubUrl, input.githubToken);
       await pullCommits(project.id, ctx.user.userId!);
       return project;
     }),
@@ -103,6 +105,27 @@ export const projectRouter = createTRPCRouter({
         },
         orderBy: {
           commitDate: "desc",
+        },
+      });
+    }),
+
+  saveAnswer: protectedProcedure
+    .input(
+      z.object({
+        projectId: z.string(),
+        question: z.string(),
+        answer: z.string(),
+        filesReferences: z.any(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.db.question.create({
+        data: {
+          answer: input.answer,
+          filesReferences: input.filesReferences,
+          projectId: input.projectId,
+          question: input.question,
+          userId: ctx.user.userId!,
         },
       });
     }),

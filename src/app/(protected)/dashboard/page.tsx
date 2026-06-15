@@ -5,6 +5,7 @@ import { FaGithub } from "react-icons/fa";
 import { ExternalLink, GitBranch } from "lucide-react";
 import Link from "next/link";
 import CommitLog from "./commit-log";
+import AskQuestionCard from "./ask-question-card";
 
 <FaGithub className="h-5 w-5" />;
 const DashboardPage = () => {
@@ -41,7 +42,7 @@ const DashboardPage = () => {
       </div>
       <div className="mt-4">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-5">
-          Ask Question Card Meeting Card
+          <AskQuestionCard />
         </div>
       </div>
       <div className="mt-8"></div>

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -11,8 +12,10 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import useProject from "@/hooks/use-project";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +25,7 @@ import {
   LayoutDashboard,
   Plus,
   Presentation,
+  ChevronRight, // 👈 Imported the right arrow icon
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -52,95 +56,162 @@ const items = [
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const { open } = useSidebar();
+  const { open, setOpen } = useSidebar(); // 👈 Added setOpen to manually control state
   const { projects, projectId, setProjectId } = useProject();
+
   return (
-    <Sidebar collapsible="icon" variant="floating">
-      <SidebarHeader>
-        <div className="flex items-center gap-2">
-          <Image src={`/logo.png`} alt="logo" width={40} height={40} />
-          {open && (
-            <h1 className="text-primary/80 text-xl font-bold">CodeForge</h1>
-          )}
-        </div>
-      </SidebarHeader>
-      <SidebarContent>
-        {/*  Application */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    className={cn(
-                      "rounded-lg",
-                      pathname === item.url && "bg-[#0A66FF]! text-white!",
-                    )}
-                  >
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+    <TooltipProvider delayDuration={0}>
+      <Sidebar collapsible="icon" variant="floating">
+        {/* Header Container */}
+        <SidebarHeader className={cn("pb-3", open && "border-b")}>
+          <div
+            className={cn(
+              "flex items-center gap-2 px-1",
+              open ? "justify-between" : "flex-col justify-center",
+            )}
+          >
+            {/* Logo and Title Group */}
+            <div className="flex items-center gap-2">
+              <Image
+                src={`/logo.png`}
+                alt="logo"
+                width={32}
+                height={32}
+                className="shrink-0"
+              />
+              {open && (
+                <h1 className="text-primary/80 animate-in fade-in text-lg font-bold tracking-tight duration-200">
+                  CodeForge
+                </h1>
+              )}
+            </div>
 
-        {/* Projects */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Your Projects</SidebarGroupLabel>
+            {/* CONDITIONAL ACTION BUTTONS */}
+            {open ? (
+              // Show normal shrink button when open
+              <SidebarTrigger className="text-muted-foreground hover:bg-muted h-8 w-8" />
+            ) : (
+              // ✨ Show right arrow unshrink button when closed
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setOpen(true)}
+                className="text-muted-foreground hover:bg-muted animate-in zoom-in-75 mt-2 h-8 w-8 rounded-md duration-250"
+                title="Expand Sidebar"
+              >
+                <ChevronRight className="size-4 stroke-[2.5]" />
+              </Button>
+            )}
+          </div>
+        </SidebarHeader>
 
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {projects?.map((project) => (
-                <SidebarMenuItem key={project.name}>
-                  <SidebarMenuButton asChild>
-                    <div
-                      className="flex items-center gap-3"
-                      onClick={() => {
-                        setProjectId(project.id);
-                      }}
+        {/* Main Content Area */}
+        <SidebarContent className="flex flex-col gap-0 overflow-hidden">
+          {/* Application Navigation */}
+          <SidebarGroup className="flex-none">
+            {open && <SidebarGroupLabel>Application</SidebarGroupLabel>}
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {items.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      tooltip={!open ? item.title : undefined}
+                      className={cn(
+                        "rounded-lg transition-colors",
+                        pathname === item.url && "bg-[#0A66FF]! text-white!",
+                      )}
+                    >
+                      <Link href={item.url}>
+                        <item.icon className="size-4" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+
+          {open && <hr className="border-border/60 mx-3" />}
+
+          {/* Projects Section */}
+          <SidebarGroup className="flex min-h-0 flex-1 flex-col overflow-hidden pb-2">
+            {open && <SidebarGroupLabel>Your Projects</SidebarGroupLabel>}
+
+            <div
+              className={cn(
+                "flex-1 space-y-1 overflow-y-auto",
+                open ? "scrollbar-thin pr-1" : "scrollbar-none",
+              )}
+            >
+              <SidebarMenu>
+                {projects?.map((project) => (
+                  <SidebarMenuItem key={project.name}>
+                    <SidebarMenuButton
+                      asChild
+                      tooltip={!open ? project.name : undefined}
+                      className="hover:bg-muted/60 cursor-pointer justify-center rounded-lg"
                     >
                       <div
                         className={cn(
-                          "flex size-6 items-center justify-center rounded-md border text-sm",
-                          {
-                            "bg-[#0A66FF] text-white": project.id === projectId,
-                          },
+                          "flex w-full items-center",
+                          open ? "justify-start gap-3" : "justify-center",
                         )}
+                        onClick={() => setProjectId(project.id)}
                       >
-                        {project.name.charAt(0).toUpperCase()}
+                        <div
+                          className={cn(
+                            "flex size-6 shrink-0 items-center justify-center rounded-md border text-xs font-semibold shadow-sm transition-all",
+                            project.id === projectId
+                              ? "border-[#0A66FF] bg-[#0A66FF] text-white"
+                              : "bg-background text-muted-foreground",
+                          )}
+                        >
+                          {project.name.charAt(0).toUpperCase()}
+                        </div>
+
+                        {open && (
+                          <span
+                            className={cn(
+                              "animate-in fade-in truncate text-sm duration-200",
+                              project.id === projectId
+                                ? "text-foreground font-semibold"
+                                : "text-muted-foreground",
+                            )}
+                          >
+                            {project.name}
+                          </span>
+                        )}
                       </div>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </div>
+          </SidebarGroup>
+        </SidebarContent>
 
-                      <span className="truncate">{project.name}</span>
-                    </div>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-              <div className="h-2"></div>
-
-              {open && (
-                <SidebarMenuItem className="mt-2">
-                  <Link href="/create" className="block">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="w-full justify-start gap-2 rounded-lg"
-                    >
-                      <Plus className="size-4" />
-                      Create Project
-                    </Button>
-                  </Link>
-                </SidebarMenuItem>
-              )}
+        {/* Static Footer Actions Block */}
+        {open && (
+          <SidebarFooter className="bg-background/50 animate-in fade-in border-t p-3 backdrop-blur-sm duration-200">
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <Link href="/create" className="block w-full">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="border-border/80 w-full justify-start gap-2 rounded-lg border-dashed text-xs font-medium shadow-sm hover:border-solid"
+                  >
+                    <Plus className="text-muted-foreground size-3.5" />
+                    Create Project
+                  </Button>
+                </Link>
+              </SidebarMenuItem>
             </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-    </Sidebar>
+          </SidebarFooter>
+        )}
+      </Sidebar>
+    </TooltipProvider>
   );
 }
