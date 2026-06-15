@@ -3,7 +3,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism"; // Using a dark theme matching your screenshot example
 
 type Props = {
   filesReferences: {
@@ -18,7 +18,7 @@ const CodeReferences = ({ filesReferences }: Props) => {
 
   React.useEffect(() => {
     if (filesReferences.length > 0) {
-      setActiveTab(filesReferences[0]?.fileName ?? "");
+      setActiveTab(filesReferences[0]!.fileName);
     }
   }, [filesReferences]);
 
@@ -29,9 +29,9 @@ const CodeReferences = ({ filesReferences }: Props) => {
   if (filesReferences.length === 0) return null;
 
   return (
-    <div className="flex h-full flex-col overflow-hidden">
-      {/* Tab Navigation row */}
-      <div className="bg-muted/40 flex scrollbar-none items-center gap-1.5 overflow-x-auto border-b p-2">
+    <div className="w-full space-y-3">
+      {/* Tab bar header block layout */}
+      <div className="bg-muted/40 border-border/50 flex scrollbar-none items-center gap-2 overflow-x-auto rounded-lg border p-1.5">
         {filesReferences.map((file) => {
           const isSelected = activeTab === file.fileName;
           return (
@@ -41,34 +41,29 @@ const CodeReferences = ({ filesReferences }: Props) => {
               className={cn(
                 "rounded-md border px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-all",
                 isSelected
-                  ? "bg-background border-border text-foreground font-semibold shadow-sm"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50 border-transparent bg-transparent",
+                  ? "border-[#0A66FF] bg-[#0A66FF] text-white shadow-sm"
+                  : "bg-background text-muted-foreground hover:text-foreground border-transparent",
               )}
             >
-              {file.fileName.split("/").pop()}
+              {file.fileName}
             </button>
           );
         })}
       </div>
 
-      {/* Code Viewer Body Area */}
+      {/* Main Code Editor Frame Box */}
       {selectedFile && (
-        <div className="flex flex-1 flex-col overflow-hidden">
-          {/* Breadcrumb Path Info */}
-          <div className="bg-muted/10 text-muted-foreground border-b bg-zinc-50/50 px-4 py-2 font-mono text-xs dark:bg-transparent">
-            {selectedFile.fileName}
-          </div>
-
-          {/* Dedicated Scrolling Source Highlighter area */}
-          <div className="flex-1 scrollbar-thin overflow-auto bg-zinc-50/30 text-xs">
+        <div className="border-border flex flex-col overflow-hidden rounded-xl border bg-[#1E1E1E] shadow-md">
+          {/* Internal Code Window Content */}
+          <div className="max-h-[380px] scrollbar-thin overflow-auto text-xs">
             <SyntaxHighlighter
               language="typescript"
-              style={oneLight}
+              style={vscDarkPlus}
               customStyle={{
                 margin: 0,
                 padding: "1.25rem",
                 borderRadius: 0,
-                fontSize: "12.5px",
+                fontSize: "13px",
                 lineHeight: "1.6",
                 background: "transparent",
               }}

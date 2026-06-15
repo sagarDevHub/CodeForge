@@ -17,6 +17,7 @@ import { askCodebaseQuestion } from "./actions";
 import CodeReferences from "./code-references";
 import { api } from "@/trpc/react";
 import { toast } from "sonner";
+import useRefetch from "@/hooks/use-refetch";
 
 type FileReference = {
   fileName: string;
@@ -30,7 +31,7 @@ const AskQuestionCard = () => {
   const [open, setOpen] = React.useState(false);
   const [question, setQuestion] = React.useState("");
   const [currentAnsweredQuestion, setCurrentAnsweredQuestion] =
-    React.useState(""); // Holds context when text area resets
+    React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [answer, setAnswer] = React.useState("");
   const [files, setFiles] = React.useState<FileReference[]>([]);
@@ -43,8 +44,6 @@ const AskQuestionCard = () => {
 
     setAnswer("");
     setFiles([]);
-
-    // Cache the question being asked before wiping the textarea
     setCurrentAnsweredQuestion(question);
 
     try {
@@ -54,7 +53,7 @@ const AskQuestionCard = () => {
       const result = await askCodebaseQuestion(question, project.id);
       setAnswer(result.output ?? "No answer generated.");
       setFiles(result.filesReferences ?? []);
-      setQuestion(""); // Clean input field for next question safely
+      setQuestion("");
     } catch (error) {
       console.error(error);
       setAnswer("Something went wrong while generating the answer.");
@@ -63,55 +62,103 @@ const AskQuestionCard = () => {
     }
   };
 
+  const refetch = useRefetch();
+
   return (
     <>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="flex h-[85vh] max-h-[85vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-[90vw]">
-          {/* Header Panel */}
-          <DialogHeader className="bg-background flex flex-row items-center justify-between space-y-0 border-b px-6 py-4">
-            <div className="flex max-w-[65%] flex-col gap-1">
-              <DialogTitle className="flex items-center gap-2 text-lg font-semibold">
-                <Image src="/logo.png" alt="codeforge" width={28} height={28} />
-                CodeForge
-              </DialogTitle>
+        <DialogContent className="flex h-[90vh] max-h-[90vh] flex-col gap-0 overflow-hidden rounded-xl border p-0 shadow-lg sm:max-w-[75vw]">
+          {/* Header Panel — Added pr-14 to prevent overlapping the 'X' button */}
+          <DialogHeader className="bg-background flex flex-row items-center justify-between space-y-0 border-b py-4 pr-14 pl-6">
+            <div className="flex items-center gap-2">
+              <Image
+                src="/logo.png"
+                alt="codeforge"
+                width={28}
+                height={28}
+                className="shrink-0"
+              />
+
+              <DialogTitle className="sr-only">CodeForge AI Answer</DialogTitle>
+
               {currentAnsweredQuestion && !loading && (
-                <p className="text-muted-foreground truncate text-xs italic">
+                <p className="text-muted-foreground line-clamp-1 max-w-[35vw] text-xs italic">
                   Q: "{currentAnsweredQuestion}"
                 </p>
               )}
             </div>
 
-            {/* Action Buttons Right Aligned */}
-            <div className="flex items-center gap-2">
+            {/* Save Action Button */}
+            {!loading && answer && (
               <Button
                 variant="outline"
                 size="sm"
-                disabled={saveAnswer.isPending || loading}
+                disabled={saveAnswer.isPending}
                 onClick={() => {
                   saveAnswer.mutate(
                     {
                       projectId: project!.id,
-                      question: currentAnsweredQuestion, // Uses retained question string context
+                      question: currentAnsweredQuestion,
                       answer,
-                      filesReferences: files, // ✅ FIX: maps local 'files' variable to schema expected key
+                      filesReferences: files,
                     },
                     {
                       onSuccess: () => {
-                        toast.success(`Answer Saved!`);
+                        (toast.success(`Answer Saved!`), refetch());
                       },
-                      onError: () => {
-                        toast.error(`Failed to save answer!`);
-                      },
+                      onError: () => toast.error(`Failed to save answer!`),
                     },
                   );
                 }}
+                className={`h-8 shrink-0 gap-1.5 rounded-lg px-3 text-xs font-medium transition-all ${
+                  saveAnswer.isSuccess
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                    : "hover:bg-muted"
+                }`}
               >
-                {saveAnswer.isPending ? "Saving..." : "Save Answer"}
+                {saveAnswer.isPending ? (
+                  <span className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                ) : saveAnswer.isSuccess ? (
+                  <svg
+                    className="h-3.5 w-3.5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={3}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    className="text-muted-foreground h-3.5 w-3.5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
+                    />
+                  </svg>
+                )}
+                <span>
+                  {saveAnswer.isPending
+                    ? "Saving..."
+                    : saveAnswer.isSuccess
+                      ? "Saved"
+                      : "Save Answer"}
+                </span>
               </Button>
-            </div>
+            )}
           </DialogHeader>
 
-          {/* Body content wrapper */}
+          {/* Core Content Area */}
           {loading ? (
             <div className="bg-muted/10 flex flex-1 flex-col items-center justify-center gap-3">
               <div className="border-primary h-8 w-8 animate-spin rounded-full border-2 border-t-transparent" />
@@ -120,49 +167,29 @@ const AskQuestionCard = () => {
               </div>
             </div>
           ) : (
-            <div className="divide-border flex flex-1 divide-x overflow-hidden">
-              {/* Left Side Markdown Explainer */}
-              <div className="bg-background w-1/2 scrollbar-thin space-y-4 overflow-y-auto p-6">
-                <div className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
-                  Explanation
-                </div>
-                <div className="prose prose-sm dark:prose-invert max-w-none">
-                  <MDEditor.Markdown
-                    source={answer || ""}
-                    className="!text-foreground !bg-transparent leading-relaxed"
-                  />
-                </div>
+            <div className="bg-background custom-scrollbar flex-1 space-y-6 overflow-y-auto p-6">
+              <div className="prose prose-sm dark:prose-invert text-foreground max-w-none leading-relaxed">
+                <MDEditor.Markdown
+                  source={answer || ""}
+                  className="!text-foreground !bg-transparent"
+                />
               </div>
 
-              {/* Right Side Code Window */}
-              <div className="bg-muted/20 flex w-1/2 flex-col overflow-hidden">
-                {files.length > 0 ? (
-                  <div className="flex h-full flex-col gap-4 overflow-hidden p-6">
-                    <div className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
-                      Code References
-                    </div>
-                    <div className="border-border bg-background flex-1 overflow-hidden rounded-xl border shadow-inner">
-                      <CodeReferences filesReferences={files} />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-muted-foreground flex h-full flex-col items-center justify-center p-6 text-center">
-                    <p className="text-sm">
-                      No context files were needed for this question.
-                    </p>
-                  </div>
-                )}
-              </div>
+              {files.length > 0 && (
+                <div className="border-border/60 space-y-3 border-t pt-4">
+                  <CodeReferences filesReferences={files} />
+                </div>
+              )}
             </div>
           )}
 
-          {/* Bottom Dialog Control Row */}
+          {/* Bottom Action Footer — Added clean wrapping layout padding */}
           {!loading && (
-            <div className="bg-background flex justify-end border-t px-6 py-3">
+            <div className="bg-background flex justify-end border-t p-4">
               <Button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="rounded-lg bg-[#0A66FF] px-4 py-2 text-xs font-medium text-white shadow transition-colors hover:bg-[#0A66FF]/90"
+                className="h-10 w-full rounded-lg bg-[#0A66FF] text-sm font-medium text-white shadow transition-colors hover:bg-[#0A66FF]/90"
               >
                 Close
               </Button>
@@ -171,7 +198,6 @@ const AskQuestionCard = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Persistent User Query Input Form */}
       <Card className="relative col-span-3 rounded-xl border shadow-sm">
         <CardHeader>
           <CardTitle className="text-lg">Ask a Question</CardTitle>
