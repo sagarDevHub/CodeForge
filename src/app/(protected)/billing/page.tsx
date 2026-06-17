@@ -56,41 +56,6 @@ const BillingPage = () => {
   };
 
   return (
-    // <div className="flex min-h-screen items-center justify-center bg-slate-950 text-white">
-    //   <Script
-    //     src="https://checkout.razorpay.com/v1/checkout.js"
-    //     strategy="lazyOnload"
-    //   />
-    //   <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-8 text-center shadow-2xl">
-    //     <h1 className="mb-4 text-2xl font-bold">Razorpay Test Checkout</h1>
-
-    //     <div className="mb-6 flex items-center justify-between rounded-xl border border-slate-800 bg-slate-950 p-4">
-    //       <span className="text-sm text-slate-400">Sandbox Access</span>
-    //       <span className="text-xl font-black text-blue-400">₹{amount}</span>
-    //     </div>
-
-    //     {status === "success" && (
-    //       <div className="mb-6 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-400">
-    //         🎉 Payment Simulated & Cryptographically Verified!
-    //       </div>
-    //     )}
-
-    //     {status === "failed" && (
-    //       <div className="mb-6 rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-400">
-    //         ❌ Transaction or Verification Failed.
-    //       </div>
-    //     )}
-
-    //     <button
-    //       onClick={handlePayment}
-    //       disabled={loading}
-    //       className="w-full cursor-pointer rounded-xl bg-blue-600 py-3 font-bold transition hover:bg-blue-500 disabled:bg-slate-800"
-    //     >
-    //       {loading ? "Processing..." : "Launch Test Modal"}
-    //     </button>
-    //   </div>
-    // </div>
-
     <div className="flex min-h-[calc(100vh-4rem)] w-full items-center justify-center bg-transparent p-6">
       {/* Dynamic script loading for the gateway widget */}
       <Script

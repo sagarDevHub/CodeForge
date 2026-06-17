@@ -8,6 +8,7 @@ import {
 } from "@/lib/security/ratelimit/rate-limit";
 import { protectRequest } from "@/lib/security/arcjet/arcjet-protect";
 import { indexGithubRepo } from "@/lib/github/github-loader";
+import { generateArchitectureGraph } from "@/lib/ai/groq";
 
 export const projectRouter = createTRPCRouter({
   createProject: protectedProcedure
@@ -165,5 +166,10 @@ export const projectRouter = createTRPCRouter({
         where: { projectId: input.projectId },
         include: { user: true },
       });
+    }),
+  getArchitecture: protectedProcedure
+    .input(z.object({ projectId: z.string() }))
+    .mutation(async ({ input }) => {
+      return await generateArchitectureGraph(input.projectId);
     }),
 });

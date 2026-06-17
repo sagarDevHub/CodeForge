@@ -13,7 +13,7 @@ import useProject from "@/hooks/use-project";
 import Image from "next/image";
 import React from "react";
 import MDEditor from "@uiw/react-md-editor";
-import { askCodebaseQuestion } from "./actions";
+import { askCodebaseQuestion } from "./actions/ask-codebase-questions";
 import CodeReferences from "./code-references";
 import { api } from "@/trpc/react";
 import { toast } from "sonner";
@@ -120,7 +120,7 @@ const AskQuestionCard = () => {
                 {saveAnswer.isPending ? (
                   <Loader2 className="h-3 w-3 animate-spin" />
                 ) : saveAnswer.isSuccess ? (
-                  <Check className="h-3.5 w-3.5 stroke-[3]" />
+                  <Check className="h-3.5 w-3.5 stroke-3" />
                 ) : (
                   <Save className="h-3.5 w-3.5" />
                 )}
@@ -150,7 +150,7 @@ const AskQuestionCard = () => {
               >
                 <MDEditor.Markdown
                   source={answer || ""}
-                  className="!bg-transparent !text-current"
+                  className="bg-transparent! text-current!"
                 />
               </div>
 
@@ -188,7 +188,7 @@ const AskQuestionCard = () => {
               placeholder="Which file should I edit to change the homepage?"
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
-              className="min-h-[110px] resize-none border-zinc-200 bg-transparent text-zinc-900 focus-visible:ring-1 dark:border-zinc-800 dark:text-zinc-50"
+              className="min-h-27.5 resize-none border-zinc-200 bg-transparent text-zinc-900 focus-visible:ring-1 dark:border-zinc-800 dark:text-zinc-50"
             />
             <Button
               type="submit"

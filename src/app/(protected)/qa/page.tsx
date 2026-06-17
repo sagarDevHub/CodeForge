@@ -82,7 +82,7 @@ const QAPage = () => {
               <div className="prose prose-base dark:prose-invert text-foreground w-full max-w-none text-left leading-relaxed">
                 <MDEditor.Markdown
                   source={question.answer}
-                  className="!text-foreground !bg-transparent text-left"
+                  className="text-foreground! bg-transparent! text-left"
                 />
               </div>
             </div>

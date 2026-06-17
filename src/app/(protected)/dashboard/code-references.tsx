@@ -55,7 +55,7 @@ const CodeReferences = ({ filesReferences }: Props) => {
       {selectedFile && (
         <div className="border-border flex flex-col overflow-hidden rounded-xl border bg-[#1E1E1E] shadow-md">
           {/* Internal Code Window Content */}
-          <div className="max-h-[380px] scrollbar-thin overflow-auto text-xs">
+          <div className="max-h-95 scrollbar-thin overflow-auto text-xs">
             <SyntaxHighlighter
               language="typescript"
               style={vscDarkPlus}

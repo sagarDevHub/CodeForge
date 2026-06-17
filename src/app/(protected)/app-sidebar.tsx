@@ -25,6 +25,7 @@ import {
   LayoutDashboard,
   Plus,
   ChevronRight,
+  Workflow,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -42,6 +43,11 @@ const items = [
     icon: Bot,
   },
   {
+    title: `Repo Architecture`,
+    url: `/architecture`,
+    icon: Workflow,
+  },
+  {
     title: `Billing`,
     url: `/billing`,
     icon: CreditCard,
@@ -56,7 +62,6 @@ export function AppSidebar() {
   return (
     <TooltipProvider delayDuration={0}>
       <Sidebar collapsible="icon" variant="floating">
-        {/* Header Container */}
         <SidebarHeader className={cn("pb-3", open && "border-b")}>
           <div
             className={cn(

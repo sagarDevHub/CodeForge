@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import { protectRequest } from "../security/arcjet/arcjet-protect";
 import { Document } from "@langchain/core/documents";
+import { getCleanRepoTree } from "./utils/repo-parser";
 
 const client = new OpenAI({
   apiKey: process.env.GROQ_API_KEY,
@@ -130,4 +131,29 @@ ${question}
   });
 
   return response.choices[0]?.message?.content ?? "";
+}
+
+export async function generateArchitectureGraph(projectId: string) {
+  const repoTree = await getCleanRepoTree(projectId);
+
+  const systemPrompt = `You are a Principal Software Architect. Analyze the project repository structure and define the structural dependency relationships.
+  You MUST return ONLY a JSON object matching this exact TypeScript shape:
+  {
+    "nodes": [{ "id": "string", "label": "string", "type": "folder" | "file" }],
+    "edges": [{ "source": "string", "target": "string", "label": "string" }]
+  }`;
+
+  const response = await client.chat.completions.create({
+    model: "llama-3.3-70b-versatile",
+    messages: [
+      { role: "system", content: systemPrompt },
+      {
+        role: "user",
+        content: `Analyze this repository tree map and determine structural interactions:\n${repoTree}`,
+      },
+    ],
+    response_format: { type: "json_object" },
+  });
+
+  return JSON.parse(response.choices[0]?.message.content || "{}");
 }
