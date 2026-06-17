@@ -6,6 +6,9 @@ import { ExternalLink, GitBranch } from "lucide-react";
 import Link from "next/link";
 import CommitLog from "./commit-log";
 import AskQuestionCard from "./ask-question-card";
+import ArchiveButton from "./archive-button";
+import InviteButton from "./invite-button";
+import TeamMembers from "./team-members";
 
 <FaGithub className="h-5 w-5" />;
 const DashboardPage = () => {
@@ -13,7 +16,6 @@ const DashboardPage = () => {
 
   return (
     <div>
-      {project?.id}
       <div className="flex flex-wrap items-center justify-between gap-y-4">
         {/* Github link */}
         <div className="w-fit rounded-md bg-[#0A66FF] px-4 py-3">
@@ -37,7 +39,7 @@ const DashboardPage = () => {
         <div className="h-4"></div>
 
         <div className="flex items-center gap-4">
-          Team Members Invite Button Archive Button
+          <TeamMembers /> <InviteButton /> <ArchiveButton />
         </div>
       </div>
       <div className="mt-4">

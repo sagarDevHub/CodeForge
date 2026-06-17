@@ -80,10 +80,17 @@ const CreatePage = () => {
             <div className="h-4"></div>
             <Button
               type="submit"
-              className="rounded-lg bg-[#0A66FF]"
+              className="cursor-pointer rounded-lg bg-[#0A66FF] font-medium text-white hover:bg-[#0A66FF]/90 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={createProject.isPending}
             >
-              Create Project
+              {createProject.isPending ? (
+                <div className="flex items-center gap-2">
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                  Creating...
+                </div>
+              ) : (
+                "Create Project"
+              )}
             </Button>
           </form>
         </div>

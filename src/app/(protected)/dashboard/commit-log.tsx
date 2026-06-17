@@ -41,8 +41,9 @@ const CommitLog = () => {
                   "absolute top-0 left-0 flex w-6 justify-center",
                 )}
               >
-                <div className="w-px translate-x-1 bg-gray-200"></div>
+                <div className="w-px translate-x-1 bg-zinc-200 dark:bg-zinc-800"></div>
               </div>
+
               <>
                 <div className="relative mt-2 flex-none">
                   <Image
@@ -50,44 +51,51 @@ const CommitLog = () => {
                     alt="commit avatar"
                     width={40}
                     height={40}
-                    className="h-10 w-10 rounded-full object-cover shadow-sm ring-2 ring-white"
+                    className="h-10 w-10 rounded-full object-cover shadow-sm ring-2 ring-white dark:ring-zinc-950"
                   />
                 </div>
-                <div className="flex-auto rounded-md bg-white p-3 ring-1 ring-gray-200 ring-inset">
-                  <div className="flex justify-between gap-x-4">
+
+                <div className="flex-auto rounded-md border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/50">
+                  <div className="mb-1 flex justify-between gap-x-4">
                     <Link
                       target="_blank"
                       href={`${project?.githubUrl}/commits/${commit.commitHash}`}
-                      className="py-0.5 text-xs leading-5 text-gray-500"
+                      className="py-0.5 text-xs leading-5 text-zinc-500 transition-colors hover:text-blue-600 dark:text-zinc-400 dark:hover:text-blue-400"
                     >
-                      <span className="font-medium text-gray-900">
+                      <span className="font-semibold text-zinc-900 dark:text-zinc-200">
                         {commit.commitAuthorName}{" "}
                       </span>
-                      <span className="inline-flex items-center">
-                        Commited <ExternalLink className="ml-1 size-4" />
+                      <span className="ml-1 inline-flex items-center gap-0.5 text-zinc-400 dark:text-zinc-500">
+                        Committed <ExternalLink className="size-3" />
                       </span>
                     </Link>
                   </div>
-                  <span className="font-semibold">{commit.commitMessage}</span>
+
+                  <span className="text-sm font-semibold text-zinc-900 sm:text-base dark:text-zinc-100">
+                    {commit.commitMessage}
+                  </span>
+
                   <div className="mt-2 flex items-start justify-between gap-4">
-                    <p className="line-clamp-2 text-sm text-gray-500">
+                    <p className="line-clamp-2 text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">
                       {extractSummary(commit.summary)}
                     </p>
 
                     <Dialog>
                       <DialogTrigger asChild>
-                        <button className="rounded-md p-2 hover:bg-gray-100">
+                        <button className="shrink-0 cursor-pointer rounded-md p-2 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700 dark:text-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-300">
                           <Eye className="size-4" />
                         </button>
                       </DialogTrigger>
 
-                      <DialogContent className="h-[85vh] w-[90vw] max-w-6xl overflow-y-auto">
-                        <DialogHeader>
-                          <DialogTitle>{commit.commitMessage}</DialogTitle>
+                      <DialogContent className="custom-scrollbar h-[85vh] w-[90vw] max-w-6xl overflow-y-auto rounded-xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-950">
+                        <DialogHeader className="border-b border-zinc-100 pb-4 dark:border-zinc-900">
+                          <DialogTitle className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
+                            {commit.commitMessage}
+                          </DialogTitle>
                         </DialogHeader>
 
                         <div className="mt-4">
-                          <pre className="text-sm leading-6 whitespace-pre-wrap">
+                          <pre className="overflow-x-auto rounded-lg border border-zinc-100 bg-zinc-50 p-4 font-mono text-sm leading-6 whitespace-pre-wrap text-zinc-800 dark:border-zinc-900/60 dark:bg-zinc-900/40 dark:text-zinc-200">
                             {commit.summary}
                           </pre>
                         </div>

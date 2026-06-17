@@ -24,8 +24,7 @@ import {
   CreditCard,
   LayoutDashboard,
   Plus,
-  Presentation,
-  ChevronRight, // 👈 Imported the right arrow icon
+  ChevronRight,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -43,11 +42,6 @@ const items = [
     icon: Bot,
   },
   {
-    title: `Meetings`,
-    url: `/meetings`,
-    icon: Presentation,
-  },
-  {
     title: `Billing`,
     url: `/billing`,
     icon: CreditCard,
@@ -56,7 +50,7 @@ const items = [
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const { open, setOpen } = useSidebar(); // 👈 Added setOpen to manually control state
+  const { open, setOpen } = useSidebar();
   const { projects, projectId, setProjectId } = useProject();
 
   return (
@@ -70,7 +64,6 @@ export function AppSidebar() {
               open ? "justify-between" : "flex-col justify-center",
             )}
           >
-            {/* Logo and Title Group */}
             <div className="flex items-center gap-2">
               <Image
                 src={`/logo.png`}
@@ -86,12 +79,9 @@ export function AppSidebar() {
               )}
             </div>
 
-            {/* CONDITIONAL ACTION BUTTONS */}
             {open ? (
-              // Show normal shrink button when open
               <SidebarTrigger className="text-muted-foreground hover:bg-muted h-8 w-8" />
             ) : (
-              // ✨ Show right arrow unshrink button when closed
               <Button
                 variant="ghost"
                 size="icon"
@@ -105,9 +95,7 @@ export function AppSidebar() {
           </div>
         </SidebarHeader>
 
-        {/* Main Content Area */}
         <SidebarContent className="flex flex-col gap-0 overflow-hidden">
-          {/* Application Navigation */}
           <SidebarGroup className="flex-none">
             {open && <SidebarGroupLabel>Application</SidebarGroupLabel>}
             <SidebarGroupContent>
@@ -135,7 +123,6 @@ export function AppSidebar() {
 
           {open && <hr className="border-border/60 mx-3" />}
 
-          {/* Projects Section */}
           <SidebarGroup className="flex min-h-0 flex-1 flex-col overflow-hidden pb-2">
             {open && <SidebarGroupLabel>Your Projects</SidebarGroupLabel>}
 
@@ -147,7 +134,7 @@ export function AppSidebar() {
             >
               <SidebarMenu>
                 {projects?.map((project) => (
-                  <SidebarMenuItem key={project.name}>
+                  <SidebarMenuItem key={project.id}>
                     <SidebarMenuButton
                       asChild
                       tooltip={!open ? project.name : undefined}
@@ -192,7 +179,6 @@ export function AppSidebar() {
           </SidebarGroup>
         </SidebarContent>
 
-        {/* Static Footer Actions Block */}
         {open && (
           <SidebarFooter className="bg-background/50 animate-in fade-in border-t p-3 backdrop-blur-sm duration-200">
             <SidebarMenu>
