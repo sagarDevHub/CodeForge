@@ -96,43 +96,6 @@ Keep the response under 200 words.
   }
 }
 
-// export async function answerQuestion(question: string, context: string) {
-//   const response = await client.chat.completions.create({
-//     model: "llama-3.3-70b-versatile",
-//     messages: [
-//       {
-//         role: "system",
-//         content: `
-// You are a senior software engineer.
-
-// Answer questions about the codebase.
-
-// Only use information present in the context.
-
-// Mention file names whenever possible.
-
-// If the context does not contain the answer,
-// say that the information is unavailable.
-// `,
-//       },
-//       {
-//         role: "user",
-//         content: `
-// CONTEXT:
-
-// ${context}
-
-// QUESTION:
-
-// ${question}
-// `,
-//       },
-//     ],
-//   });
-
-//   return response.choices[0]?.message?.content ?? "";
-// }
-
 export async function answerQuestion(question: string, context: string) {
   try {
     const trimmedContext =
