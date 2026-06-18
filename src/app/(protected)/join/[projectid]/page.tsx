@@ -68,7 +68,7 @@ const JoinHandler = async ({ params }: Props) => {
     });
   }
 
-  return redirect(`/dashboard/${projectId}`);
+  return redirect(`/dashboard`);
 };
 
 export default JoinHandler;
