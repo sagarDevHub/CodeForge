@@ -84,7 +84,7 @@ const AskQuestionCard = () => {
 
               {currentAnsweredQuestion && !loading && (
                 <p className="line-clamp-1 max-w-[35vw] text-xs text-zinc-500 italic dark:text-zinc-400">
-                  Q: "{currentAnsweredQuestion}"
+                  {`Q: "{currentAnsweredQuestion}"`}
                 </p>
               )}
             </div>

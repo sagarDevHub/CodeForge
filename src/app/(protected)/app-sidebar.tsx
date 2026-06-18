@@ -26,6 +26,7 @@ import {
   Plus,
   ChevronRight,
   Workflow,
+  Rocket,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -46,6 +47,11 @@ const items = [
     title: `Repo Architecture`,
     url: `/architecture`,
     icon: Workflow,
+  },
+  {
+    title: `Deployment Check`,
+    url: "/deployment",
+    icon: Rocket,
   },
   {
     title: `Billing`,

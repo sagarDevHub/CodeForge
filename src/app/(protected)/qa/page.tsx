@@ -13,6 +13,7 @@ import React from "react";
 import AskQuestionCard from "../dashboard/ask-question-card";
 import MDEditor from "@uiw/react-md-editor";
 import CodeReferences from "../dashboard/code-references";
+import Image from "next/image";
 
 const QAPage = () => {
   const { projectId } = useProject();
@@ -32,8 +33,9 @@ const QAPage = () => {
             <React.Fragment key={question.id}>
               <SheetTrigger onClick={() => setQuestionIndex(index)}>
                 <div className="flex items-center gap-4 rounded-lg border bg-white p-4 shadow">
-                  <img
+                  <Image
                     className="rounded-full"
+                    alt={`${question.user.firstName ?? "User"}'s profile picture`}
                     height={30}
                     width={30}
                     src={question.user.imageUrl ?? ""}

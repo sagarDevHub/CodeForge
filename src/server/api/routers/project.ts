@@ -9,6 +9,7 @@ import {
 import { protectRequest } from "@/lib/security/arcjet/arcjet-protect";
 import { indexGithubRepo } from "@/lib/github/github-loader";
 import { generateArchitectureGraph } from "@/lib/ai/groq";
+import { analyzeDeployment } from "@/lib/ai/utils/deployment-analyzer";
 
 export const projectRouter = createTRPCRouter({
   createProject: protectedProcedure
@@ -167,9 +168,36 @@ export const projectRouter = createTRPCRouter({
         include: { user: true },
       });
     }),
+
   getArchitecture: protectedProcedure
     .input(z.object({ projectId: z.string() }))
     .mutation(async ({ input }) => {
       return await generateArchitectureGraph(input.projectId);
+    }),
+
+  checkDeployment: protectedProcedure
+    .input(z.object({ projectId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const report = await analyzeDeployment(input.projectId);
+
+      await ctx.db.deployReport.upsert({
+        where: {
+          projectId: input.projectId,
+        },
+        create: {
+          projectId: input.projectId,
+          score: report.score,
+          stack: report.score,
+          issues: report.issues,
+          recommendations: report.recommendations,
+        },
+        update: {
+          score: report.score,
+          stack: report.stack,
+          issues: report.issues,
+          recommendations: report.recommendations,
+        },
+      });
+      return report;
     }),
 });
