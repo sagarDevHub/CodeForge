@@ -96,13 +96,58 @@ Keep the response under 200 words.
   }
 }
 
+// export async function answerQuestion(question: string, context: string) {
+//   const response = await client.chat.completions.create({
+//     model: "llama-3.3-70b-versatile",
+//     messages: [
+//       {
+//         role: "system",
+//         content: `
+// You are a senior software engineer.
+
+// Answer questions about the codebase.
+
+// Only use information present in the context.
+
+// Mention file names whenever possible.
+
+// If the context does not contain the answer,
+// say that the information is unavailable.
+// `,
+//       },
+//       {
+//         role: "user",
+//         content: `
+// CONTEXT:
+
+// ${context}
+
+// QUESTION:
+
+// ${question}
+// `,
+//       },
+//     ],
+//   });
+
+//   return response.choices[0]?.message?.content ?? "";
+// }
+
 export async function answerQuestion(question: string, context: string) {
-  const response = await client.chat.completions.create({
-    model: "llama-3.3-70b-versatile",
-    messages: [
-      {
-        role: "system",
-        content: `
+  try {
+    const trimmedContext =
+      context.length > 12000 ? context.slice(0, 12000) : context;
+
+    const models = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"];
+
+    for (const model of models) {
+      try {
+        const response = await client.chat.completions.create({
+          model,
+          messages: [
+            {
+              role: "system",
+              content: `
 You are a senior software engineer.
 
 Answer questions about the codebase.
@@ -114,23 +159,49 @@ Mention file names whenever possible.
 If the context does not contain the answer,
 say that the information is unavailable.
 `,
-      },
-      {
-        role: "user",
-        content: `
+            },
+            {
+              role: "user",
+              content: `
 CONTEXT:
 
-${context}
+${trimmedContext}
 
 QUESTION:
 
 ${question}
 `,
-      },
-    ],
-  });
+            },
+          ],
+        });
 
-  return response.choices[0]?.message?.content ?? "";
+        return response.choices[0]?.message?.content ?? "No answer generated.";
+      } catch (error: any) {
+        if (error.status === 429) {
+          console.log(`${model} quota exhausted`);
+          continue;
+        }
+
+        throw error;
+      }
+    }
+
+    return `
+⚠️ AI quota exhausted.
+
+CodeForge has reached its daily Groq limit.
+
+Please try again later.
+`;
+  } catch (error) {
+    console.error(error);
+
+    return `
+⚠️ Something went wrong while generating the answer.
+
+Please try again later.
+`;
+  }
 }
 
 export async function generateArchitectureGraph(projectId: string) {
