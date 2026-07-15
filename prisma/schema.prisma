@@ -24,6 +24,8 @@ model User {
 
     questionsAsked    Question[]
     deploymentReports DeploymentReport[]
+    subscriptions     Subscription[]
+    transactions      Transaction[]
 }
 
 model Project {
@@ -129,6 +131,38 @@ model DeploymentReport {
 
     @@unique([projectId, name])
     @@index([projectId, userId])
+}
+
+model Subscription {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    userId String @unique
+    user   User   @relation(fields: [userId], references: [id])
+
+    plan      String
+    status    String
+    paymentId String?
+    expiresAt DateTime?
+
+    @@index([userId])
+}
+
+model Transaction {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+
+    userId String
+    user   User   @relation(fields: [userId], references: [id])
+
+    plan      String
+    credits   Int
+    paymentId String
+    type      String
+
+    @@index([userId])
+    @@index([createdAt])
 }
 
 model Commit {
