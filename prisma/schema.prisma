@@ -22,7 +22,8 @@ model User {
     credits        Int             @default(150)
     userToProjects UserToProject[]
 
-    questionsAsked Question[]
+    questionsAsked    Question[]
+    deploymentReports DeploymentReport[]
 }
 
 model Project {
@@ -40,6 +41,7 @@ model Project {
     sourceCodeEmbeddings SourceCodeEmbedding[]
     savedQuestions       Question[]
     deployReport         DeployReport?
+    deploymentReports    DeploymentReport[]
 }
 
 model UserToProject {
@@ -96,8 +98,37 @@ model DeployReport {
     issues          Json
     recommendations Json
 
+    aiAnalysis           Json?
+    aiSummary            String?
+    aiConfidence         Float?
+    aiSuggestions        Json?
+    riskLevel            String?
+    performanceScore     Int?
+    securityScore        Int?
+    maintainabilityScore Int?
+
     projectId String  @unique
     project   Project @relation(fields: [projectId], references: [id])
+}
+
+model DeploymentReport {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    projectId String
+    project   Project @relation(fields: [projectId], references: [id])
+
+    name     String
+    data     Json
+    metadata Json?
+
+    isDefault Boolean @default(false)
+    userId    String
+    user      User    @relation(fields: [userId], references: [id])
+
+    @@unique([projectId, name])
+    @@index([projectId, userId])
 }
 
 model Commit {
