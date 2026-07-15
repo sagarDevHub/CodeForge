@@ -1,5 +1,7 @@
 "use client";
 
+import { usePageTitle } from "@/hooks/use-page-title";
+
 import {
   AlertCircle,
   CheckCircle2,
@@ -85,6 +87,7 @@ const triggerConfetti = () => {
 };
 
 const BillingPage = () => {
+  usePageTitle();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<"idle" | "success" | "failed">("idle");

@@ -1,4 +1,7 @@
 "use client";
+
+import { usePageTitle } from "@/hooks/use-page-title";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import useRefetch from "@/hooks/use-refetch";
@@ -15,6 +18,7 @@ type FormInput = {
 };
 
 const CreatePage = () => {
+  usePageTitle();
   const { register, handleSubmit, reset } = useForm<FormInput>();
   const createProject = api.project.createProject.useMutation();
   const refetch = useRefetch();

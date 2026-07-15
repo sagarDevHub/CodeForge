@@ -1,12 +1,8 @@
 "use client";
 
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { usePageTitle } from "@/hooks/use-page-title";
+
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import useProject from "@/hooks/use-project";
 import { api } from "@/trpc/react";
 import React, { useState, useMemo } from "react";
@@ -24,7 +20,6 @@ import {
   Sparkles,
   Clock,
   Search,
-  Filter,
   ArrowUpRight,
   X,
 } from "lucide-react";
@@ -42,6 +37,7 @@ import {
 import { cn } from "@/lib/utils";
 
 const QAPage = () => {
+  usePageTitle();
   const { projectId } = useProject();
   const { data: questions } = api.project.getQuestions.useQuery({ projectId });
 

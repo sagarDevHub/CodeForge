@@ -1,5 +1,7 @@
 "use client";
 
+import { usePageTitle } from "@/hooks/use-page-title";
+
 import useProject from "@/hooks/use-project";
 import { FaGithub } from "react-icons/fa";
 import { ExternalLink, GitBranch } from "lucide-react";
@@ -12,6 +14,7 @@ import TeamMembers from "./team-members";
 
 <FaGithub className="h-5 w-5" />;
 const DashboardPage = () => {
+  usePageTitle();
   const { project } = useProject();
 
   return (

@@ -1,5 +1,7 @@
 "use client";
 
+import { usePageTitle } from "@/hooks/use-page-title";
+
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -91,6 +93,7 @@ interface SavedReport {
 }
 
 const DeploymentPage = () => {
+  usePageTitle();
   const { project } = useProject();
   const projectId = project?.id;
 
