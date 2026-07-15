@@ -163,7 +163,7 @@ const DeploymentPage = () => {
   const getOneReportQuery = api.deployment.getOneReport.useQuery(
     { id: selectedReportId || "placeholder" },
     {
-      enabled: Boolean(selectedReportId) && selectedReportId.trim() !== "",
+      enabled: !!selectedReportId && selectedReportId?.trim() !== "",
     },
   );
 
