@@ -523,7 +523,7 @@ const BillingPage = () => {
 
           <DialogFooter className="flex flex-col gap-2 sm:flex-row">
             <Button
-              onClick={() => router.push("/protected/dashboard")}
+              onClick={() => router.push("/dashboard")}
               className="flex-1 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
             >
               Go to Dashboard
