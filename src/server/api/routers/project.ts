@@ -10,6 +10,7 @@ import { protectRequest } from "@/lib/security/arcjet/arcjet-protect";
 import { indexGithubRepo } from "@/lib/github/github-loader";
 import { generateArchitectureGraph } from "@/lib/ai/groq";
 import { analyzeDeployment } from "@/lib/ai/utils/deployment-analyzer";
+import { processProjectInBackground } from "@/lib/services/project-processor";
 
 export const projectRouter = createTRPCRouter({
   createProject: protectedProcedure
@@ -37,6 +38,9 @@ export const projectRouter = createTRPCRouter({
         data: {
           githubUrl: input.githubUrl,
           name: input.name,
+          status: "pending",
+          statusMessage: "Initializing...",
+          progress: 0,
           userToProjects: {
             create: {
               userId: ctx.user.userId!,
@@ -44,6 +48,15 @@ export const projectRouter = createTRPCRouter({
           },
         },
       });
+      processProjectInBackground(
+        project.id,
+        input.githubUrl,
+        ctx.user.userId!,
+        input.githubToken,
+      ).catch((err) => {
+        console.error("Background processing error: ", err);
+      });
+
       await indexGithubRepo(project.id, input.githubUrl, input.githubToken);
       await pullCommits(project.id, ctx.user.userId!);
       return project;

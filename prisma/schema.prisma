@@ -44,6 +44,13 @@ model Project {
     savedQuestions       Question[]
     deployReport         DeployReport?
     deploymentReports    DeploymentReport[]
+
+    status        String  @default("pending")
+    statusMessage String?
+    progress      Int     @default(0)
+
+    @@index([deletedAt])
+    @@index([status])
 }
 
 model UserToProject {

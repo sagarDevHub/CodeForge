@@ -3,6 +3,7 @@ import { UserButton } from "@clerk/nextjs";
 import React from "react";
 import { AppSidebar } from "./app-sidebar";
 import { ThemeToggle } from "../_components/theme-toggle";
+import { BackgroundTasks } from "@/components/background-tasks";
 
 type Props = {
   children: React.ReactNode;
@@ -26,6 +27,7 @@ const SidebarLayout = ({ children }: Props) => {
           </div>
         </main>
       </div>
+      <BackgroundTasks />
     </SidebarProvider>
   );
 };
