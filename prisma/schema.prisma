@@ -22,10 +22,11 @@ model User {
     credits        Int             @default(150)
     userToProjects UserToProject[]
 
-    questionsAsked    Question[]
-    deploymentReports DeploymentReport[]
-    subscriptions     Subscription[]
-    transactions      Transaction[]
+    questionsAsked         Question[]
+    deploymentReports      DeploymentReport[]
+    subscriptions          Subscription[]
+    transactions           Transaction[]
+    architectureBlueprints ArchitectureBlueprint[]
 }
 
 model Project {
@@ -45,12 +46,33 @@ model Project {
     deployReport         DeployReport?
     deploymentReports    DeploymentReport[]
 
-    status        String  @default("pending")
-    statusMessage String?
-    progress      Int     @default(0)
+    status                 String                  @default("pending")
+    statusMessage          String?
+    progress               Int                     @default(0)
+    architectureBlueprints ArchitectureBlueprint[]
 
     @@index([deletedAt])
     @@index([status])
+}
+
+model ArchitectureBlueprint {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    projectId String
+    project   Project @relation(fields: [projectId], references: [id])
+
+    name     String
+    data     Json
+    metadata Json?
+
+    isDefault Boolean @default(false)
+    userId    String
+    user      User    @relation(fields: [userId], references: [id])
+
+    @@unique([projectId, name])
+    @@index([projectId, userId])
 }
 
 model UserToProject {

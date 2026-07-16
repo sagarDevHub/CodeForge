@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { Folder, FileCode, Cpu, Database, Globe, Shield } from "lucide-react";
 import type { GraphNode } from "../types";
 
 interface ArchitectureGraphViewProps {
@@ -8,27 +9,26 @@ interface ArchitectureGraphViewProps {
   selectedNodeId: string | null;
   hoveredNodeId: string | null;
   zoomLevel: number;
-  onNodeSelect: (nodeId: string) => void;
-  onNodeHover: (nodeId: string | null) => void;
+  onNodeSelect: (id: string) => void;
+  onNodeHover: (id: string | null) => void;
 }
 
 const getNodeIcon = (type: string) => {
-  // Import icons or use emojis for simplicity
   switch (type) {
     case "folder":
-      return "📁";
+      return Folder;
     case "file":
-      return "📄";
+      return FileCode;
     case "service":
-      return "⚙️";
+      return Cpu;
     case "database":
-      return "🗄️";
+      return Database;
     case "api":
-      return "🌐";
+      return Globe;
     case "auth":
-      return "🔒";
+      return Shield;
     default:
-      return "📄";
+      return FileCode;
   }
 };
 
@@ -43,13 +43,14 @@ export function ArchitectureGraphView({
   return (
     <div className="w-full overflow-auto">
       <div
-        className="grid grid-cols-2 gap-2 p-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4"
+        className="grid grid-cols-3 gap-4 p-2"
         style={{
           transform: `scale(${zoomLevel})`,
           transformOrigin: "top left",
         }}
       >
         {nodes.map((node) => {
+          const Icon = getNodeIcon(node.type);
           const isSelected = selectedNodeId === node.id;
           const isHovered = hoveredNodeId === node.id;
 
@@ -59,7 +60,7 @@ export function ArchitectureGraphView({
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               whileHover={{ scale: 1.05 }}
-              className={`relative min-w-20 rounded-lg border-2 p-2 text-center transition-all sm:p-3 ${
+              className={`relative rounded-lg border-2 p-3 text-center transition-all ${
                 isSelected
                   ? "border-blue-500 bg-blue-50 shadow-lg dark:border-blue-500 dark:bg-blue-950/30"
                   : isHovered
@@ -72,23 +73,19 @@ export function ArchitectureGraphView({
             >
               <div className="flex justify-center">
                 <div
-                  className={`rounded-lg p-1.5 sm:p-2 ${
+                  className={`rounded-lg p-2 ${
                     isSelected
                       ? "bg-blue-500 text-white"
                       : "bg-zinc-100 text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400"
                   }`}
                 >
-                  <span className="text-xl sm:text-2xl">
-                    {getNodeIcon(node.type)}
-                  </span>
+                  <Icon className="h-5 w-5" />
                 </div>
               </div>
-              <p className="mt-1 truncate font-mono text-[10px] font-medium text-zinc-800 sm:mt-2 sm:text-xs dark:text-zinc-200">
+              <p className="mt-2 truncate font-mono text-xs font-medium text-zinc-800 dark:text-zinc-200">
                 {node.label}
               </p>
-              <p className="text-[8px] text-zinc-400 sm:text-[10px]">
-                {node.type}
-              </p>
+              <p className="text-[10px] text-zinc-400">{node.type}</p>
             </motion.div>
           );
         })}

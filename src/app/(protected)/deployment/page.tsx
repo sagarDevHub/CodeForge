@@ -38,6 +38,13 @@ const DeploymentPage = () => {
   );
   const [forceRefresh, setForceRefresh] = useState(false);
 
+  useEffect(() => {
+    setAnalysisData(null);
+    setSavedReports([]);
+    setSelectedReportId(null);
+    setIsSaved(false);
+  }, [projectId]);
+
   // API calls with force refresh support
   const analyzeMutation = api.deployment.analyze.useMutation({
     onSuccess: (data) => {
@@ -127,7 +134,6 @@ const DeploymentPage = () => {
       toast.error("No project selected");
       return;
     }
-    // If we already have data, force refresh the cache
     if (analysisData) {
       setForceRefresh(true);
     }
@@ -193,7 +199,12 @@ const DeploymentPage = () => {
     }
   };
 
-  // Loading states
+  useEffect(() => {
+    if (projectId) {
+      loadReports();
+    }
+  }, [projectId]);
+
   if (!projectId) {
     return <DeploymentEmptyState />;
   }
@@ -246,19 +257,15 @@ const DeploymentPage = () => {
       {/* Analysis Results */}
       {analysisData && !analyzeMutation.isPending && (
         <>
-          {/* Save indicator */}
           <DeploymentSaveIndicator isSaved={isSaved} />
 
-          {/* Summary */}
           <DeploymentSummary
             analysis={analysisData}
             getRiskColor={getRiskColor}
           />
 
-          {/* Score Cards */}
           <DeploymentScoreCards analysis={analysisData} />
 
-          {/* Main Grid */}
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <DeploymentLeftPanel analysis={analysisData} />
             <DeploymentRightPanel analysis={analysisData} />

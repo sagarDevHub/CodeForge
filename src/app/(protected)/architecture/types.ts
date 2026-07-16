@@ -32,3 +32,12 @@ export interface GraphData {
 
 export type FilterType = "all" | "module" | "file" | "resource";
 export type ViewMode = "graph" | "list";
+
+export interface Blueprint {
+  id: string;
+  name: string;
+  createdAt: Date;
+  updatedAt: Date;
+  isDefault: boolean;
+  metadata: any;
+}

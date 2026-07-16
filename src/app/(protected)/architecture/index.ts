@@ -8,5 +8,7 @@ export { ArchitectureLoadingState } from "./components/ArchitectureLoadingState"
 export { ArchitectureEmptyState } from "./components/ArchitectureEmptyState";
 export { ArchitectureToolbar } from "./components/ArchitectureToolbar";
 export { ArchitectureFilters } from "./components/ArchitectureFilters";
+export { ArchitectureSaveDialog } from "./components/ArchitectureSaveDialog";
+export { ArchitectureBlueprintList } from "./components/ArchitectureBlueprintList";
 
 export * from "./types";
