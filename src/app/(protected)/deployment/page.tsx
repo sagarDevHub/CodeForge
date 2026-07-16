@@ -8,16 +8,16 @@ import { toast } from "sonner";
 import { ConfirmationDialog } from "@/components/confirmation-dialog";
 
 import { Button } from "@/components/ui/button";
-import { DeploymentEmptyState } from "./DeploymentEmptyState";
-import { DeploymentHeader } from "./DeploymentHeader";
-import { DeploymentReportList } from "./DeploymentReportList";
-import { DeploymentLoadingState } from "./DeploymentLoadingState";
-import { DeploymentSaveIndicator } from "./DeploymentSaveIndicator";
-import { DeploymentSummary } from "./DeploymentSummary";
-import { DeploymentScoreCards } from "./DeploymentScoreCards";
-import { DeploymentLeftPanel } from "./DeploymentLeftPanel";
-import { DeploymentSaveDialog } from "./DeploymentSaveDialog";
-import { DeploymentRightPanel } from "./DeploymentRightPanel";
+import { DeploymentEmptyState } from "./components/DeploymentEmptyState";
+import { DeploymentHeader } from "./components/DeploymentHeader";
+import { DeploymentReportList } from "./components/DeploymentReportList";
+import { DeploymentLoadingState } from "./components/DeploymentLoadingState";
+import { DeploymentSaveIndicator } from "./components/DeploymentSaveIndicator";
+import { DeploymentSummary } from "./components/DeploymentSummary";
+import { DeploymentScoreCards } from "./components/DeploymentScoreCards";
+import { DeploymentLeftPanel } from "./components/DeploymentLeftPanel";
+import { DeploymentSaveDialog } from "./components/DeploymentSaveDialog";
+import { DeploymentRightPanel } from "./components/DeploymentRightPanel";
 import type { AIAnalysis, SavedReport } from "./types";
 
 const DeploymentPage = () => {

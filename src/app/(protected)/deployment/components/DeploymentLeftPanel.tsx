@@ -9,7 +9,7 @@ import {
   CheckCircle2,
   AlertTriangle,
 } from "lucide-react";
-import type { AIAnalysis } from "./types";
+import type { AIAnalysis } from "../types";
 
 interface DeploymentLeftPanelProps {
   analysis: AIAnalysis;

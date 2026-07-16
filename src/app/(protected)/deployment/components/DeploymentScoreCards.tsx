@@ -3,7 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Gauge, Lock, Cpu, Layers } from "lucide-react";
-import type { AIAnalysis } from "./types";
+import type { AIAnalysis } from "../types";
 
 interface DeploymentScoreCardsProps {
   analysis: AIAnalysis;

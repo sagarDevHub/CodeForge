@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { FolderOpen, Save, Trash2, Star } from "lucide-react";
-import type { SavedReport } from "./types";
+import type { SavedReport } from "../types";
 
 interface DeploymentReportListProps {
   reports: SavedReport[];

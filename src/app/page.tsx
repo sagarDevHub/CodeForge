@@ -12,7 +12,6 @@ const Home = () => {
         Your production-ready, containerized development workspace environment.
       </p>
 
-      {/* 🚀 Link component routes the client directly to the dashboard */}
       <Link href="/dashboard" passHref>
         <Button size="lg" className="cursor-pointer font-semibold">
           Go to Dashboard
