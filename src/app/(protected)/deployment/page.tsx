@@ -36,8 +36,9 @@ const DeploymentPage = () => {
   const [reportToDelete, setReportToDelete] = useState<SavedReport | null>(
     null,
   );
+  const [forceRefresh, setForceRefresh] = useState(false);
 
-  // API calls
+  // API calls with force refresh support
   const analyzeMutation = api.deployment.analyze.useMutation({
     onSuccess: (data) => {
       setAnalysisData(data.analysis);
@@ -46,9 +47,11 @@ const DeploymentPage = () => {
         description: `Score: ${data.score}/100 • Risk: ${data.riskLevel}`,
       });
       loadReports();
+      setForceRefresh(false);
     },
     onError: (err) => {
       toast.error(err.message || "Analysis failed");
+      setForceRefresh(false);
     },
   });
 
@@ -124,7 +127,11 @@ const DeploymentPage = () => {
       toast.error("No project selected");
       return;
     }
-    analyzeMutation.mutate({ projectId });
+    // If we already have data, force refresh the cache
+    if (analysisData) {
+      setForceRefresh(true);
+    }
+    analyzeMutation.mutate({ projectId, forceRefresh: !!analysisData });
   };
 
   const handleSaveReport = () => {
@@ -219,7 +226,7 @@ const DeploymentPage = () => {
             {analyzeMutation.isPending ? (
               <>
                 <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                Analyzing...
+                {forceRefresh ? "Refreshing..." : "Analyzing..."}
               </>
             ) : analysisData ? (
               <>

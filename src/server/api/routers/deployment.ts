@@ -2,13 +2,17 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { analyzeDeployment } from "@/lib/ai/utils/deployment-analyzer";
+import { CACHE_TTL, cacheKeys } from "@/lib/redis/client";
+import { CacheService } from "@/lib/services/cache-service";
 
 export const deploymentRouter = createTRPCRouter({
   // Run AI analysis and update DeployReport
   analyze: protectedProcedure
-    .input(z.object({ projectId: z.string() }))
+    .input(
+      z.object({ projectId: z.string(), forceRefresh: z.boolean().optional() }),
+    )
     .mutation(async ({ ctx, input }) => {
-      const { projectId } = input;
+      const { projectId, forceRefresh = false } = input;
       const userId = ctx.user.userId!;
 
       // Check if user has access to this project
@@ -21,14 +25,42 @@ export const deploymentRouter = createTRPCRouter({
             },
           },
         },
+        include: {
+          commits: { take: 10, orderBy: { createdAt: "desc" } },
+          sourceCodeEmbeddings: { take: 20 },
+        },
       });
 
       if (!project) {
         throw new TRPCError({ code: "FORBIDDEN", message: "Access denied" });
       }
 
-      // Run AI analysis
-      const analysis = await analyzeDeployment(projectId);
+      const cacheKey = cacheKeys.deployment(projectId);
+
+      // Get analysis from cache or run AI
+      const analysis = await CacheService.getOrSet(
+        cacheKey,
+        async () => {
+          const projectData = {
+            projectName: project.name,
+            githubUrl: project.githubUrl,
+            fileCount: project.sourceCodeEmbeddings?.length || 0,
+            directoryStructure:
+              project.sourceCodeEmbeddings?.map((e) => e.fileName) || [],
+            commitHistory: project.commits?.map((c) => c.commitMessage) || [],
+            sourceCodeSnippets:
+              project.sourceCodeEmbeddings?.map((e) =>
+                e.sourceCode.slice(0, 500),
+              ) || [],
+          };
+
+          return await analyzeDeployment(projectData);
+        },
+        {
+          ttl: CACHE_TTL.DEPLOYMENT,
+          forceRefresh,
+        },
+      );
 
       // Calculate overall score (weighted)
       const overallScore = Math.round(
@@ -72,6 +104,8 @@ export const deploymentRouter = createTRPCRouter({
         },
       });
 
+      await CacheService.invalidate(cacheKeys.allDeploymentReports(projectId));
+
       return { ...report, analysis };
     }),
 
@@ -97,11 +131,18 @@ export const deploymentRouter = createTRPCRouter({
         throw new TRPCError({ code: "FORBIDDEN", message: "Access denied" });
       }
 
-      return ctx.db.deployReport.findUnique({ where: { projectId } });
+      const cacheKey = `deployment:${projectId}:current`;
+
+      return await CacheService.getOrSet(
+        cacheKey,
+        async () => {
+          return ctx.db.deployReport.findUnique({ where: { projectId } });
+        },
+        { ttl: CACHE_TTL.DEPLOYMENT },
+      );
     }),
 
   // Save a named report snapshot
-  // In src/server/api/routers/deployment.ts
   saveReport: protectedProcedure
     .input(
       z.object({
@@ -131,8 +172,6 @@ export const deploymentRouter = createTRPCRouter({
           },
         });
 
-        console.log("📁 Project found:", project ? "Yes" : "No");
-
         if (!project) {
           throw new TRPCError({ code: "FORBIDDEN", message: "Access denied" });
         }
@@ -146,8 +185,6 @@ export const deploymentRouter = createTRPCRouter({
           },
         });
 
-        console.log("📄 Existing report:", existing ? "Yes" : "No");
-
         let result;
 
         if (existing) {
@@ -160,10 +197,7 @@ export const deploymentRouter = createTRPCRouter({
               isDefault: isDefault || false,
             },
           });
-          console.log("✅ Report Updated:", result.id);
         } else {
-          // Create new
-          // If setting as default, unset others first
           if (isDefault) {
             await ctx.db.deploymentReport.updateMany({
               where: {
@@ -185,7 +219,18 @@ export const deploymentRouter = createTRPCRouter({
               userId: userId,
             },
           });
-          console.log("✅ Report Created:", result.id);
+        }
+
+        // Invalidate caches
+        await CacheService.invalidate(
+          cacheKeys.allDeploymentReports(projectId),
+        );
+        await CacheService.invalidate(`deployment:${projectId}:current`);
+
+        if (existing) {
+          await CacheService.invalidate(
+            cacheKeys.deploymentReport(projectId, existing.id),
+          );
         }
 
         return result;
@@ -218,21 +263,28 @@ export const deploymentRouter = createTRPCRouter({
         throw new TRPCError({ code: "FORBIDDEN", message: "Access denied" });
       }
 
-      return ctx.db.deploymentReport.findMany({
-        where: {
-          projectId: projectId,
-          userId: userId,
+      const cacheKey = cacheKeys.allDeploymentReports(projectId);
+      return await CacheService.getOrSet(
+        cacheKey,
+        async () => {
+          return ctx.db.deploymentReport.findMany({
+            where: {
+              projectId: projectId,
+              userId: userId,
+            },
+            orderBy: { createdAt: "desc" },
+            select: {
+              id: true,
+              name: true,
+              createdAt: true,
+              updatedAt: true,
+              isDefault: true,
+              metadata: true,
+            },
+          });
         },
-        orderBy: { createdAt: "desc" },
-        select: {
-          id: true,
-          name: true,
-          createdAt: true,
-          updatedAt: true,
-          isDefault: true,
-          metadata: true,
-        },
-      });
+        { ttl: CACHE_TTL.REPORTS },
+      );
     }),
 
   // Get a single saved report by id
@@ -253,7 +305,11 @@ export const deploymentRouter = createTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND", message: "Report not found" });
       }
 
-      return report;
+      const cacheKey = cacheKeys.deploymentReport(report.projectId, id);
+
+      return await CacheService.getOrSet(cacheKey, async () => report, {
+        ttl: CACHE_TTL.REPORTS,
+      });
     }),
 
   // Get default report
@@ -263,13 +319,21 @@ export const deploymentRouter = createTRPCRouter({
       const { projectId } = input;
       const userId = ctx.user.userId!;
 
-      return ctx.db.deploymentReport.findFirst({
-        where: {
-          projectId: projectId,
-          userId: userId,
-          isDefault: true,
+      const cacheKey = `deployment:${projectId}:reports:default`;
+
+      return await CacheService.getOrSet(
+        cacheKey,
+        async () => {
+          return ctx.db.deploymentReport.findFirst({
+            where: {
+              projectId: projectId,
+              userId: userId,
+              isDefault: true,
+            },
+          });
         },
-      });
+        { ttl: CACHE_TTL.REPORTS },
+      );
     }),
 
   // Delete a saved report
@@ -290,6 +354,19 @@ export const deploymentRouter = createTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND", message: "Report not found" });
       }
 
-      return ctx.db.deploymentReport.delete({ where: { id: id } });
+      const result = await ctx.db.deploymentReport.delete({
+        where: { id: id },
+      });
+
+      // Invalidate caches
+      await CacheService.invalidate(
+        cacheKeys.allDeploymentReports(report.projectId),
+      );
+      await CacheService.invalidate(`deployment:${report.projectId}:current`);
+      await CacheService.invalidate(
+        cacheKeys.deploymentReport(report.projectId, id),
+      );
+
+      return result;
     }),
 });

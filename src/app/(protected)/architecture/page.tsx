@@ -14,7 +14,6 @@ import {
   Workflow,
   Folder,
   FileCode,
-  ArrowRight,
   GitBranch,
   Layers,
   Zap,
@@ -22,12 +21,10 @@ import {
   Database,
   Globe,
   Shield,
-  Code2,
   Maximize2,
   Minimize2,
   ZoomIn,
   ZoomOut,
-  Move,
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -103,7 +100,6 @@ export default function RepoArchitecturePage() {
   const { project } = useProject();
   const projectId = project?.id;
 
-  const [graphData, setGraphData] = useState<GraphData | null>(null);
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1);
@@ -111,17 +107,28 @@ export default function RepoArchitecturePage() {
   const [viewMode, setViewMode] = useState<"graph" | "list">("graph");
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
 
-  const generateChart = api.project.getArchitecture.useMutation({
-    onSuccess: (data) => {
-      const transformedData = transformGraphData(data as any);
-      setGraphData(transformedData);
-      toast.success("System architecture blueprint calculated!", {
-        description: `Found ${transformedData.nodes.length} modules with ${transformedData.edges.length} dependencies`,
-      });
+  // ✅ Use the new cached query instead of mutation
+  const {
+    data: architectureData,
+    refetch,
+    isLoading,
+    isFetching,
+  } = api.architecture.getArchitecture.useQuery(
+    { projectId: projectId! },
+    {
+      enabled: !!projectId,
+      staleTime: 1000 * 60 * 60, // 1 hour
+    },
+  );
+
+  // ✅ Invalidate cache mutation
+  const invalidateCache = api.architecture.invalidateArchitecture.useMutation({
+    onSuccess: () => {
+      toast.success("Cache invalidated, refreshing data...");
+      refetch();
     },
     onError: (error) => {
-      console.error(error);
-      toast.error(error.message || "Failed to generate architecture.");
+      toast.error(error.message || "Failed to invalidate cache");
     },
   });
 
@@ -213,10 +220,21 @@ export default function RepoArchitecturePage() {
     };
   };
 
-  const handleAnalyze = useCallback(() => {
+  const graphData = useMemo(() => {
+    if (!architectureData) return null;
+    return transformGraphData(architectureData);
+  }, [architectureData]);
+
+  const handleRefresh = useCallback(() => {
     if (!projectId) return;
-    generateChart.mutate({ projectId });
-  }, [projectId, generateChart]);
+    refetch();
+    toast.info("Refreshing architecture data...");
+  }, [projectId, refetch]);
+
+  const handleInvalidateCache = useCallback(() => {
+    if (!projectId) return;
+    invalidateCache.mutate({ projectId });
+  }, [projectId, invalidateCache]);
 
   const filteredData = useMemo(() => {
     if (!graphData) return null;
@@ -317,7 +335,7 @@ export default function RepoArchitecturePage() {
                 key={idx}
                 className="group relative overflow-hidden rounded-lg border border-zinc-200 bg-white p-3 shadow-sm transition-all hover:shadow-md dark:border-zinc-800 dark:bg-zinc-950"
               >
-                <div className="absolute inset-0 bg-linear-to-br from-blue-500/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
                 <div className="relative flex items-center gap-2 sm:gap-3">
                   <div className="rounded-lg bg-blue-100 p-1.5 sm:p-2 dark:bg-blue-900/30">
                     <metric.icon className="h-3 w-3 text-blue-600 sm:h-4 sm:w-4 dark:text-blue-400" />
@@ -342,7 +360,7 @@ export default function RepoArchitecturePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
           className={`relative flex w-full flex-col rounded-xl border border-zinc-200 bg-white shadow-sm transition-all dark:border-zinc-800 dark:bg-zinc-950 ${
-            isFullscreen ? "fixed inset-4 z-50 h-auto" : "min-h-125"
+            isFullscreen ? "fixed inset-4 z-50 h-auto" : "min-h-[500px]"
           }`}
         >
           <div className="flex flex-col gap-3 border-b border-zinc-100 p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4 dark:border-zinc-900">
@@ -421,129 +439,127 @@ export default function RepoArchitecturePage() {
                 )}
               </Button>
 
-              {/* Generate Button */}
+              {/* Refresh Button */}
               <Button
-                onClick={handleAnalyze}
-                disabled={generateChart.isPending}
-                className="h-7 cursor-pointer rounded-lg bg-blue-600 px-2 text-[10px] font-medium text-white shadow transition-all hover:bg-blue-500 disabled:opacity-50 sm:h-9 sm:px-4 sm:text-sm"
+                onClick={handleRefresh}
+                disabled={isFetching}
+                variant="outline"
+                size="sm"
+                className="h-7 px-2 text-[10px] sm:h-9 sm:px-3 sm:text-sm"
               >
-                {generateChart.isPending ? (
-                  <div className="flex items-center gap-1 sm:gap-2">
-                    <Loader2 className="h-3 w-3 animate-spin sm:h-4 sm:w-4" />
-                    <span className="hidden sm:inline">Mapping...</span>
-                  </div>
-                ) : graphData ? (
-                  <div className="flex items-center gap-1 sm:gap-2">
-                    <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4" />
-                    <span className="hidden sm:inline">Recalculate</span>
-                  </div>
+                <RefreshCw
+                  className={`h-3 w-3 sm:h-4 sm:w-4 ${isFetching ? "animate-spin" : ""}`}
+                />
+                <span className="ml-1 hidden sm:inline">Refresh</span>
+              </Button>
+
+              {/* Invalidate Cache Button */}
+              <Button
+                onClick={handleInvalidateCache}
+                disabled={invalidateCache.isPending}
+                variant="destructive"
+                size="sm"
+                className="h-7 px-2 text-[10px] sm:h-9 sm:px-3 sm:text-sm"
+              >
+                {invalidateCache.isPending ? (
+                  <Loader2 className="h-3 w-3 animate-spin sm:h-4 sm:w-4" />
                 ) : (
-                  <span>Generate</span>
+                  "Clear Cache"
                 )}
               </Button>
             </div>
           </div>
 
-          {/* Content Area - FIXED OVERLAPPING */}
+          {/* Content Area */}
           <div className="flex flex-1 flex-col p-3 sm:p-4 lg:flex-row lg:gap-4">
             {/* Node List (Left) */}
             <div className="w-full lg:w-1/4">
               <h3 className="mb-2 text-[10px] font-semibold tracking-wider text-zinc-400 uppercase sm:mb-3 sm:text-xs">
                 Modules ({filteredData?.nodes.length || 0})
               </h3>
-              <div className="custom-scrollbar max-h-62.5 space-y-1.5 overflow-y-auto pr-1 sm:max-h-87.5 sm:pr-2 lg:max-h-112.5">
-                <AnimatePresence>
-                  {filteredData?.nodes.map((node) => {
-                    const Icon = getNodeIcon(node.type);
-                    const isSelected = selectedNode === node.id;
-                    const isHovered = hoveredNode === node.id;
+              <div className="custom-scrollbar max-h-[250px] space-y-1.5 overflow-y-auto pr-1 sm:max-h-[350px] sm:pr-2 lg:max-h-[450px]">
+                {isLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+                  </div>
+                ) : (
+                  <AnimatePresence>
+                    {filteredData?.nodes.map((node) => {
+                      const Icon = getNodeIcon(node.type);
+                      const isSelected = selectedNode === node.id;
+                      const isHovered = hoveredNode === node.id;
 
-                    return (
-                      <motion.div
-                        key={node.id}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
-                        transition={{ duration: 0.2 }}
-                        onMouseEnter={() => setHoveredNode(node.id)}
-                        onMouseLeave={() => setHoveredNode(null)}
-                        onClick={() =>
-                          setSelectedNode(isSelected ? null : node.id)
-                        }
-                        className={`group flex cursor-pointer items-center gap-2 rounded-lg border p-2 transition-all ${
-                          isSelected
-                            ? "border-blue-500 bg-blue-50 shadow-sm dark:border-blue-500 dark:bg-blue-950/30"
-                            : "border-transparent hover:border-zinc-200 hover:bg-zinc-50 dark:hover:border-zinc-800 dark:hover:bg-zinc-900/50"
-                        }`}
-                      >
-                        <div
-                          className={`rounded-md p-1 ${
+                      return (
+                        <motion.div
+                          key={node.id}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -20 }}
+                          transition={{ duration: 0.2 }}
+                          onMouseEnter={() => setHoveredNode(node.id)}
+                          onMouseLeave={() => setHoveredNode(null)}
+                          onClick={() =>
+                            setSelectedNode(isSelected ? null : node.id)
+                          }
+                          className={`group flex cursor-pointer items-center gap-2 rounded-lg border p-2 transition-all ${
                             isSelected
-                              ? "bg-blue-500 text-white"
-                              : "bg-zinc-100 text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400"
+                              ? "border-blue-500 bg-blue-50 shadow-sm dark:border-blue-500 dark:bg-blue-950/30"
+                              : "border-transparent hover:border-zinc-200 hover:bg-zinc-50 dark:hover:border-zinc-800 dark:hover:bg-zinc-900/50"
                           }`}
                         >
-                          <Icon className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate font-mono text-[10px] font-medium text-zinc-800 sm:text-xs dark:text-zinc-200">
-                            {node.label}
-                          </p>
-                          <p className="truncate text-[8px] text-zinc-400 sm:text-[10px]">
-                            {node.metadata?.description || node.type}
-                          </p>
-                        </div>
-                        {node.metadata?.complexity && (
-                          <Badge
-                            variant="secondary"
-                            className="font-mono text-[8px] sm:text-[10px]"
+                          <div
+                            className={`rounded-md p-1 ${
+                              isSelected
+                                ? "bg-blue-500 text-white"
+                                : "bg-zinc-100 text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400"
+                            }`}
                           >
-                            {node.metadata.complexity}
-                          </Badge>
-                        )}
-                      </motion.div>
-                    );
-                  })}
-                </AnimatePresence>
+                            <Icon className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate font-mono text-[10px] font-medium text-zinc-800 sm:text-xs dark:text-zinc-200">
+                              {node.label}
+                            </p>
+                            <p className="truncate text-[8px] text-zinc-400 sm:text-[10px]">
+                              {node.metadata?.description || node.type}
+                            </p>
+                          </div>
+                          {node.metadata?.complexity && (
+                            <Badge
+                              variant="secondary"
+                              className="font-mono text-[8px] sm:text-[10px]"
+                            >
+                              {node.metadata.complexity}
+                            </Badge>
+                          )}
+                        </motion.div>
+                      );
+                    })}
+                  </AnimatePresence>
+                )}
               </div>
             </div>
 
             {/* Graph/List View (Right) */}
             <div className="mt-4 w-full flex-1 lg:mt-0">
-              <div className="relative min-h-75 rounded-lg border border-zinc-200 bg-zinc-50/50 p-2 sm:min-h-100 sm:p-4 dark:border-zinc-800 dark:bg-zinc-900/30">
-                {generateChart.isPending && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 sm:gap-3">
-                    <Loader2 className="h-6 w-6 animate-spin text-blue-500 sm:h-8 sm:w-8" />
-                    <div className="animate-pulse text-xs font-medium text-zinc-500 sm:text-sm dark:text-zinc-400">
-                      Running deep system relationship extraction...
-                    </div>
-                    <div className="h-1.5 w-32 overflow-hidden rounded-full bg-zinc-200 sm:w-48 dark:bg-zinc-800">
-                      <motion.div
-                        className="h-full bg-blue-500"
-                        initial={{ width: "0%" }}
-                        animate={{ width: ["0%", "100%"] }}
-                        transition={{
-                          duration: 2,
-                          repeat: Infinity,
-                          ease: "linear",
-                        }}
-                      />
+              <div className="relative min-h-[300px] rounded-lg border border-zinc-200 bg-zinc-50/50 p-2 sm:min-h-[400px] sm:p-4 dark:border-zinc-800 dark:bg-zinc-900/30">
+                {isLoading ? (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                    <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+                    <div className="animate-pulse text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                      Loading architecture...
                     </div>
                   </div>
-                )}
-
-                {!generateChart.isPending && !graphData && (
+                ) : !graphData ? (
                   <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-center sm:gap-3">
                     <AlertCircle className="h-6 w-6 text-zinc-300 sm:h-8 sm:w-8 dark:text-zinc-700" />
                     <p className="text-xs text-zinc-400 sm:text-sm">
-                      Ready for blueprint synthesis. Click Generate to map
+                      Ready for blueprint synthesis. Click Refresh to map
                       codebase.
                     </p>
                   </div>
-                )}
-
-                {graphData && viewMode === "list" && (
-                  <div className="max-h-100 space-y-2 overflow-y-auto sm:max-h-125 sm:space-y-3">
+                ) : viewMode === "list" ? (
+                  <div className="max-h-[400px] space-y-2 overflow-y-auto sm:max-h-[500px] sm:space-y-3">
                     {filteredData?.edges.map((edge, idx) => {
                       const sourceNode = filteredData?.nodes.find(
                         (n) => n.id === edge.source,
@@ -615,9 +631,7 @@ export default function RepoArchitecturePage() {
                       );
                     })}
                   </div>
-                )}
-
-                {graphData && viewMode === "graph" && (
+                ) : (
                   <div className="w-full overflow-auto">
                     <div
                       className="grid grid-cols-2 gap-2 p-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4"
@@ -637,7 +651,7 @@ export default function RepoArchitecturePage() {
                             initial={{ opacity: 0, scale: 0.8 }}
                             animate={{ opacity: 1, scale: 1 }}
                             whileHover={{ scale: 1.05 }}
-                            className={`relative min-w-20 rounded-lg border-2 p-2 text-center transition-all sm:p-3 ${
+                            className={`relative min-w-[80px] rounded-lg border-2 p-2 text-center transition-all sm:p-3 ${
                               isSelected
                                 ? "border-blue-500 bg-blue-50 shadow-lg dark:border-blue-500 dark:bg-blue-950/30"
                                 : isHovered

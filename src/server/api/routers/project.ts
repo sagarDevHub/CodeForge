@@ -11,6 +11,7 @@ import { indexGithubRepo } from "@/lib/github/github-loader";
 import { generateArchitectureGraph } from "@/lib/ai/groq";
 import { analyzeDeployment } from "@/lib/ai/utils/deployment-analyzer";
 import { processProjectInBackground } from "@/lib/services/project-processor";
+import { CacheService } from "@/lib/services/cache-service";
 
 export const projectRouter = createTRPCRouter({
   createProject: protectedProcedure
@@ -163,7 +164,7 @@ export const projectRouter = createTRPCRouter({
   archiveProject: protectedProcedure
     .input(z.object({ projectId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      return await ctx.db.project.update({
+      const result = await ctx.db.project.update({
         where: {
           id: input.projectId,
         },
@@ -171,6 +172,10 @@ export const projectRouter = createTRPCRouter({
           deletedAt: new Date(),
         },
       });
+      // Invalidate all caches for this project
+      await CacheService.invalidatePattern(`*${input.projectId}*`);
+
+      return result;
     }),
 
   getTeamMember: protectedProcedure
