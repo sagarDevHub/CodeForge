@@ -113,7 +113,6 @@ export default function RepoArchitecturePage() {
 
   const generateChart = api.project.getArchitecture.useMutation({
     onSuccess: (data) => {
-      // Transform the API response into our enhanced graph structure
       const transformedData = transformGraphData(data as any);
       setGraphData(transformedData);
       toast.success("System architecture blueprint calculated!", {
@@ -127,10 +126,6 @@ export default function RepoArchitecturePage() {
   });
 
   const transformGraphData = (rawData: any): GraphData => {
-    // This function should transform your API response into the enhanced format
-    // For demo purposes, we'll create a structured response
-    // You should adapt this to match your actual API response structure
-
     if (rawData && rawData.nodes && rawData.edges) {
       return {
         nodes: rawData.nodes.map((node: any) => ({
@@ -153,7 +148,6 @@ export default function RepoArchitecturePage() {
       };
     }
 
-    // Fallback mock data with enhanced structure
     return {
       nodes: [
         { id: "src", label: "src", type: "folder" },
@@ -267,7 +261,7 @@ export default function RepoArchitecturePage() {
 
   return (
     <TooltipProvider>
-      <div className="min-h-[calc(100vh-4rem)] w-full space-y-6 bg-transparent p-6">
+      <div className="min-h-[calc(100vh-4rem)] w-full space-y-6 bg-transparent p-4 sm:p-6">
         {/* Header */}
         <header className="flex flex-col gap-1">
           <motion.div
@@ -275,11 +269,11 @@ export default function RepoArchitecturePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-              <Network className="h-6 w-6 text-blue-500" />
+            <h1 className="flex items-center gap-2 text-xl font-bold tracking-tight text-zinc-900 sm:text-2xl dark:text-zinc-50">
+              <Network className="h-5 w-5 text-blue-500 sm:h-6 sm:w-6" />
               System Blueprints
             </h1>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+            <p className="text-xs text-zinc-500 sm:text-sm dark:text-zinc-400">
               Explore interactive relationship flows mapping system dependencies
               for{" "}
               <span className="font-semibold text-blue-600 dark:text-blue-400">
@@ -295,7 +289,7 @@ export default function RepoArchitecturePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="grid grid-cols-2 gap-4 sm:grid-cols-4"
+            className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-4"
           >
             {[
               {
@@ -321,18 +315,18 @@ export default function RepoArchitecturePage() {
             ].map((metric, idx) => (
               <div
                 key={idx}
-                className="group relative overflow-hidden rounded-lg border border-zinc-200 bg-white p-4 shadow-sm transition-all hover:shadow-md dark:border-zinc-800 dark:bg-zinc-950"
+                className="group relative overflow-hidden rounded-lg border border-zinc-200 bg-white p-3 shadow-sm transition-all hover:shadow-md dark:border-zinc-800 dark:bg-zinc-950"
               >
                 <div className="absolute inset-0 bg-linear-to-br from-blue-500/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-                <div className="relative flex items-center gap-3">
-                  <div className="rounded-lg bg-blue-100 p-2 dark:bg-blue-900/30">
-                    <metric.icon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <div className="relative flex items-center gap-2 sm:gap-3">
+                  <div className="rounded-lg bg-blue-100 p-1.5 sm:p-2 dark:bg-blue-900/30">
+                    <metric.icon className="h-3 w-3 text-blue-600 sm:h-4 sm:w-4 dark:text-blue-400" />
                   </div>
                   <div>
-                    <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                    <p className="text-[10px] font-medium text-zinc-500 sm:text-xs dark:text-zinc-400">
                       {metric.label}
                     </p>
-                    <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+                    <p className="text-lg font-bold text-zinc-900 sm:text-2xl dark:text-zinc-50">
                       {metric.value}
                     </p>
                   </div>
@@ -348,30 +342,30 @@ export default function RepoArchitecturePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
           className={`relative flex w-full flex-col rounded-xl border border-zinc-200 bg-white shadow-sm transition-all dark:border-zinc-800 dark:bg-zinc-950 ${
-            isFullscreen ? "fixed inset-4 z-50 h-auto" : "min-h-150"
+            isFullscreen ? "fixed inset-4 z-50 h-auto" : "min-h-125"
           }`}
         >
-          <div className="flex flex-col items-start justify-between gap-4 border-b border-zinc-100 p-4 sm:flex-row sm:items-center dark:border-zinc-900">
+          <div className="flex flex-col gap-3 border-b border-zinc-100 p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4 dark:border-zinc-900">
             <div>
-              <h2 className="flex items-center gap-2 text-lg font-bold text-zinc-900 dark:text-zinc-50">
-                <Network className="h-5 w-5 text-blue-500" /> Dependency & Flow
-                Architecture
+              <h2 className="flex items-center gap-2 text-sm font-bold text-zinc-900 sm:text-lg dark:text-zinc-50">
+                <Network className="h-4 w-4 text-blue-500 sm:h-5 sm:w-5" />
+                Dependency & Flow Architecture
               </h2>
-              <p className="text-xs text-zinc-400">
+              <p className="text-[10px] text-zinc-400 sm:text-xs">
                 Structural interaction map across modules
               </p>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-1 sm:gap-2">
               {/* Filter Buttons */}
-              <div className="flex gap-1 rounded-lg border border-zinc-200 p-1 dark:border-zinc-800">
+              <div className="flex rounded-lg border border-zinc-200 p-0.5 sm:p-1 dark:border-zinc-800">
                 {["all", "module", "file", "resource"].map((type) => (
                   <Button
                     key={type}
                     variant={filterType === type ? "default" : "ghost"}
                     size="sm"
                     onClick={() => setFilterType(type)}
-                    className="h-7 px-2 text-xs capitalize"
+                    className="h-6 px-1.5 text-[10px] capitalize sm:h-7 sm:px-2 sm:text-xs"
                   >
                     {type}
                   </Button>
@@ -385,29 +379,29 @@ export default function RepoArchitecturePage() {
                 onClick={() =>
                   setViewMode(viewMode === "graph" ? "list" : "graph")
                 }
-                className="h-7 px-2 text-xs"
+                className="h-6 px-1.5 text-[10px] sm:h-7 sm:px-2 sm:text-xs"
               >
-                {viewMode === "graph" ? "List View" : "Graph View"}
+                {viewMode === "graph" ? "List" : "Graph"}
               </Button>
 
               {/* Zoom Controls */}
-              <div className="flex gap-1">
+              <div className="flex items-center gap-0.5 sm:gap-1">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setZoomLevel(Math.max(0.5, zoomLevel - 0.1))}
-                  className="h-7 w-7 p-0"
+                  className="h-6 w-6 p-0 sm:h-7 sm:w-7"
                 >
                   <ZoomOut className="h-3 w-3" />
                 </Button>
-                <span className="flex items-center text-xs text-zinc-500">
+                <span className="min-w-10 text-center text-[10px] text-zinc-500 sm:text-xs">
                   {Math.round(zoomLevel * 100)}%
                 </span>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setZoomLevel(Math.min(2, zoomLevel + 0.1))}
-                  className="h-7 w-7 p-0"
+                  className="h-6 w-6 p-0 sm:h-7 sm:w-7"
                 >
                   <ZoomIn className="h-3 w-3" />
                 </Button>
@@ -418,7 +412,7 @@ export default function RepoArchitecturePage() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsFullscreen(!isFullscreen)}
-                className="h-7 w-7 p-0"
+                className="h-6 w-6 p-0 sm:h-7 sm:w-7"
               >
                 {isFullscreen ? (
                   <Minimize2 className="h-3 w-3" />
@@ -431,33 +425,33 @@ export default function RepoArchitecturePage() {
               <Button
                 onClick={handleAnalyze}
                 disabled={generateChart.isPending}
-                className="h-9 cursor-pointer rounded-lg bg-blue-600 px-4 text-sm font-medium text-white shadow transition-all hover:bg-blue-500 disabled:opacity-50"
+                className="h-7 cursor-pointer rounded-lg bg-blue-600 px-2 text-[10px] font-medium text-white shadow transition-all hover:bg-blue-500 disabled:opacity-50 sm:h-9 sm:px-4 sm:text-sm"
               >
                 {generateChart.isPending ? (
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>Mapping...</span>
+                  <div className="flex items-center gap-1 sm:gap-2">
+                    <Loader2 className="h-3 w-3 animate-spin sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Mapping...</span>
                   </div>
                 ) : graphData ? (
-                  <div className="flex items-center gap-2">
-                    <RefreshCw className="h-4 w-4" />
-                    <span>Recalculate</span>
+                  <div className="flex items-center gap-1 sm:gap-2">
+                    <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Recalculate</span>
                   </div>
                 ) : (
-                  "Generate Architecture"
+                  <span>Generate</span>
                 )}
               </Button>
             </div>
           </div>
 
-          {/* Content Area */}
-          <div className="flex flex-1 flex-col p-4 md:flex-row">
+          {/* Content Area - FIXED OVERLAPPING */}
+          <div className="flex flex-1 flex-col p-3 sm:p-4 lg:flex-row lg:gap-4">
             {/* Node List (Left) */}
-            <div className="mb-4 w-full md:mb-0 md:w-1/4 md:pr-4">
-              <h3 className="mb-3 text-xs font-semibold tracking-wider text-zinc-400 uppercase">
+            <div className="w-full lg:w-1/4">
+              <h3 className="mb-2 text-[10px] font-semibold tracking-wider text-zinc-400 uppercase sm:mb-3 sm:text-xs">
                 Modules ({filteredData?.nodes.length || 0})
               </h3>
-              <div className="custom-scrollbar max-h-100 space-y-1.5 overflow-y-auto pr-2">
+              <div className="custom-scrollbar max-h-62.5 space-y-1.5 overflow-y-auto pr-1 sm:max-h-87.5 sm:pr-2 lg:max-h-112.5">
                 <AnimatePresence>
                   {filteredData?.nodes.map((node) => {
                     const Icon = getNodeIcon(node.type);
@@ -476,33 +470,33 @@ export default function RepoArchitecturePage() {
                         onClick={() =>
                           setSelectedNode(isSelected ? null : node.id)
                         }
-                        className={`group flex cursor-pointer items-center gap-2.5 rounded-lg border p-2.5 transition-all ${
+                        className={`group flex cursor-pointer items-center gap-2 rounded-lg border p-2 transition-all ${
                           isSelected
                             ? "border-blue-500 bg-blue-50 shadow-sm dark:border-blue-500 dark:bg-blue-950/30"
                             : "border-transparent hover:border-zinc-200 hover:bg-zinc-50 dark:hover:border-zinc-800 dark:hover:bg-zinc-900/50"
                         }`}
                       >
                         <div
-                          className={`rounded-md p-1.5 ${
+                          className={`rounded-md p-1 ${
                             isSelected
                               ? "bg-blue-500 text-white"
                               : "bg-zinc-100 text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400"
                           }`}
                         >
-                          <Icon className="h-3.5 w-3.5" />
+                          <Icon className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="truncate font-mono text-xs font-medium text-zinc-800 dark:text-zinc-200">
+                          <p className="truncate font-mono text-[10px] font-medium text-zinc-800 sm:text-xs dark:text-zinc-200">
                             {node.label}
                           </p>
-                          <p className="truncate text-[10px] text-zinc-400">
+                          <p className="truncate text-[8px] text-zinc-400 sm:text-[10px]">
                             {node.metadata?.description || node.type}
                           </p>
                         </div>
                         {node.metadata?.complexity && (
                           <Badge
                             variant="secondary"
-                            className="font-mono text-[10px]"
+                            className="font-mono text-[8px] sm:text-[10px]"
                           >
                             {node.metadata.complexity}
                           </Badge>
@@ -515,15 +509,15 @@ export default function RepoArchitecturePage() {
             </div>
 
             {/* Graph/List View (Right) */}
-            <div className="flex-1">
-              <div className="relative min-h-100 rounded-lg border border-zinc-200 bg-zinc-50/50 p-4 dark:border-zinc-800 dark:bg-zinc-900/30">
+            <div className="mt-4 w-full flex-1 lg:mt-0">
+              <div className="relative min-h-75 rounded-lg border border-zinc-200 bg-zinc-50/50 p-2 sm:min-h-100 sm:p-4 dark:border-zinc-800 dark:bg-zinc-900/30">
                 {generateChart.isPending && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-                    <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-                    <div className="animate-pulse text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 sm:gap-3">
+                    <Loader2 className="h-6 w-6 animate-spin text-blue-500 sm:h-8 sm:w-8" />
+                    <div className="animate-pulse text-xs font-medium text-zinc-500 sm:text-sm dark:text-zinc-400">
                       Running deep system relationship extraction...
                     </div>
-                    <div className="h-1.5 w-48 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800">
+                    <div className="h-1.5 w-32 overflow-hidden rounded-full bg-zinc-200 sm:w-48 dark:bg-zinc-800">
                       <motion.div
                         className="h-full bg-blue-500"
                         initial={{ width: "0%" }}
@@ -539,9 +533,9 @@ export default function RepoArchitecturePage() {
                 )}
 
                 {!generateChart.isPending && !graphData && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center">
-                    <AlertCircle className="h-8 w-8 text-zinc-300 dark:text-zinc-700" />
-                    <p className="text-sm text-zinc-400">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-center sm:gap-3">
+                    <AlertCircle className="h-6 w-6 text-zinc-300 sm:h-8 sm:w-8 dark:text-zinc-700" />
+                    <p className="text-xs text-zinc-400 sm:text-sm">
                       Ready for blueprint synthesis. Click Generate to map
                       codebase.
                     </p>
@@ -549,7 +543,7 @@ export default function RepoArchitecturePage() {
                 )}
 
                 {graphData && viewMode === "list" && (
-                  <div className="space-y-3">
+                  <div className="max-h-100 space-y-2 overflow-y-auto sm:max-h-125 sm:space-y-3">
                     {filteredData?.edges.map((edge, idx) => {
                       const sourceNode = filteredData?.nodes.find(
                         (n) => n.id === edge.source,
@@ -565,20 +559,23 @@ export default function RepoArchitecturePage() {
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.2, delay: idx * 0.02 }}
-                          className="flex items-center justify-between rounded-lg border border-zinc-100 bg-white p-3 shadow-sm hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900"
+                          className="flex flex-col gap-1 rounded-lg border border-zinc-100 bg-white p-2 shadow-sm hover:shadow-md sm:flex-row sm:items-center sm:justify-between sm:p-3 dark:border-zinc-800 dark:bg-zinc-900"
                         >
-                          <div className="flex min-w-0 flex-1 items-center gap-3">
-                            <div className="flex items-center gap-2">
-                              <span className="truncate font-mono text-sm font-medium text-zinc-800 dark:text-zinc-200">
+                          <div className="flex min-w-0 flex-1 items-center gap-2">
+                            <div className="flex items-center gap-1 sm:gap-2">
+                              <span className="truncate font-mono text-xs font-medium text-zinc-800 sm:text-sm dark:text-zinc-200">
                                 {sourceNode?.label || edge.source}
                               </span>
-                              <Badge variant="outline" className="text-[10px]">
+                              <Badge
+                                variant="outline"
+                                className="text-[8px] sm:text-[10px]"
+                              >
                                 {sourceNode?.type}
                               </Badge>
                             </div>
                           </div>
 
-                          <div className="flex flex-1 items-center justify-center gap-2 px-4">
+                          <div className="flex flex-1 items-center justify-center gap-1 px-1 sm:gap-2 sm:px-4">
                             <div
                               className="h-px flex-1"
                               style={{
@@ -591,7 +588,7 @@ export default function RepoArchitecturePage() {
                                 color: edgeColor,
                                 borderColor: `${edgeColor}40`,
                               }}
-                              className="border px-2 py-0 text-[10px]"
+                              className="border px-1 py-0 text-[8px] sm:px-2 sm:text-[10px]"
                             >
                               {edge.label || edge.type || "depends"}
                             </Badge>
@@ -603,11 +600,14 @@ export default function RepoArchitecturePage() {
                             />
                           </div>
 
-                          <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
-                            <Badge variant="outline" className="text-[10px]">
+                          <div className="flex min-w-0 flex-1 items-center justify-end gap-1 sm:gap-2">
+                            <Badge
+                              variant="outline"
+                              className="text-[8px] sm:text-[10px]"
+                            >
                               {targetNode?.type}
                             </Badge>
-                            <span className="truncate font-mono text-sm font-medium text-zinc-800 dark:text-zinc-200">
+                            <span className="truncate font-mono text-xs font-medium text-zinc-800 sm:text-sm dark:text-zinc-200">
                               {targetNode?.label || edge.target}
                             </span>
                           </div>
@@ -618,15 +618,14 @@ export default function RepoArchitecturePage() {
                 )}
 
                 {graphData && viewMode === "graph" && (
-                  <div
-                    className="relative h-125 w-full"
-                    style={{
-                      transform: `scale(${zoomLevel})`,
-                      transformOrigin: "top left",
-                    }}
-                  >
-                    {/* Graph visualization */}
-                    <div className="grid grid-cols-3 gap-4">
+                  <div className="w-full overflow-auto">
+                    <div
+                      className="grid grid-cols-2 gap-2 p-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4"
+                      style={{
+                        transform: `scale(${zoomLevel})`,
+                        transformOrigin: "top left",
+                      }}
+                    >
                       {filteredData?.nodes.map((node) => {
                         const Icon = getNodeIcon(node.type);
                         const isSelected = selectedNode === node.id;
@@ -638,7 +637,7 @@ export default function RepoArchitecturePage() {
                             initial={{ opacity: 0, scale: 0.8 }}
                             animate={{ opacity: 1, scale: 1 }}
                             whileHover={{ scale: 1.05 }}
-                            className={`relative rounded-lg border-2 p-3 text-center transition-all ${
+                            className={`relative min-w-20 rounded-lg border-2 p-2 text-center transition-all sm:p-3 ${
                               isSelected
                                 ? "border-blue-500 bg-blue-50 shadow-lg dark:border-blue-500 dark:bg-blue-950/30"
                                 : isHovered
@@ -653,19 +652,19 @@ export default function RepoArchitecturePage() {
                           >
                             <div className="flex justify-center">
                               <div
-                                className={`rounded-lg p-2 ${
+                                className={`rounded-lg p-1.5 sm:p-2 ${
                                   isSelected
                                     ? "bg-blue-500 text-white"
                                     : "bg-zinc-100 text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400"
                                 }`}
                               >
-                                <Icon className="h-5 w-5" />
+                                <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
                               </div>
                             </div>
-                            <p className="mt-2 truncate font-mono text-xs font-medium text-zinc-800 dark:text-zinc-200">
+                            <p className="mt-1 truncate font-mono text-[10px] font-medium text-zinc-800 sm:mt-2 sm:text-xs dark:text-zinc-200">
                               {node.label}
                             </p>
-                            <p className="text-[10px] text-zinc-400">
+                            <p className="text-[8px] text-zinc-400 sm:text-[10px]">
                               {node.type}
                             </p>
                           </motion.div>
@@ -685,17 +684,18 @@ export default function RepoArchitecturePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-950"
+            className="rounded-xl border border-zinc-200 bg-white p-3 shadow-sm sm:p-4 dark:border-zinc-800 dark:bg-zinc-950"
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-blue-100 p-2 dark:bg-blue-900/30">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="rounded-lg bg-blue-100 p-1.5 sm:p-2 dark:bg-blue-900/30">
                   {React.createElement(getNodeIcon(selectedNodeData.type), {
-                    className: "h-5 w-5 text-blue-600 dark:text-blue-400",
+                    className:
+                      "h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-400",
                   })}
                 </div>
                 <div>
-                  <h3 className="font-mono text-sm font-bold text-zinc-900 dark:text-zinc-50">
+                  <h3 className="font-mono text-sm font-bold text-zinc-900 sm:text-base dark:text-zinc-50">
                     {selectedNodeData.label}
                   </h3>
                   <p className="text-xs text-zinc-500 dark:text-zinc-400">
@@ -708,28 +708,32 @@ export default function RepoArchitecturePage() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setSelectedNode(null)}
-                className="h-7 w-7 p-0"
+                className="h-6 w-6 self-end p-0 sm:h-7 sm:w-7 sm:self-auto"
               >
                 ✕
               </Button>
             </div>
             {selectedNodeData.metadata && (
-              <div className="mt-3 grid grid-cols-3 gap-3 border-t border-zinc-100 pt-3 dark:border-zinc-900">
+              <div className="mt-3 grid grid-cols-2 gap-2 border-t border-zinc-100 pt-3 sm:grid-cols-3 sm:gap-3 dark:border-zinc-900">
                 <div>
-                  <p className="text-xs text-zinc-400">Complexity</p>
-                  <p className="font-mono text-sm font-medium">
+                  <p className="text-[10px] text-zinc-400 sm:text-xs">
+                    Complexity
+                  </p>
+                  <p className="font-mono text-xs font-medium sm:text-sm">
                     {selectedNodeData.metadata.complexity || "N/A"}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-zinc-400">Lines</p>
-                  <p className="font-mono text-sm font-medium">
+                  <p className="text-[10px] text-zinc-400 sm:text-xs">Lines</p>
+                  <p className="font-mono text-xs font-medium sm:text-sm">
                     {selectedNodeData.metadata.lineCount || "N/A"}
                   </p>
                 </div>
-                <div>
-                  <p className="text-xs text-zinc-400">Exports</p>
-                  <p className="font-mono text-sm font-medium">
+                <div className="col-span-2 sm:col-span-1">
+                  <p className="text-[10px] text-zinc-400 sm:text-xs">
+                    Exports
+                  </p>
+                  <p className="font-mono text-xs font-medium sm:text-sm">
                     {selectedNodeData.metadata.exports?.length || 0}
                   </p>
                 </div>

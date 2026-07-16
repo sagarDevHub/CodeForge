@@ -279,14 +279,6 @@ const QAPage = () => {
                     {selectedQuestion.question}
                   </span>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleCloseSheet}
-                  className="h-8 w-8 p-0"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
               </div>
               <SheetTitle className="text-left text-xl leading-snug font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
                 {selectedQuestion.question}
