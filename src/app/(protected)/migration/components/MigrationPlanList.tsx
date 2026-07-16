@@ -1,5 +1,3 @@
-// src/app/(protected)/migration/components/MigrationPlanList.tsx
-
 "use client";
 
 import { useState } from "react";
