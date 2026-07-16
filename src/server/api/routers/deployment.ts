@@ -54,7 +54,7 @@ export const deploymentRouter = createTRPCRouter({
               ) || [],
           };
 
-          return await analyzeDeployment(projectData);
+          return await analyzeDeployment(projectId);
         },
         {
           ttl: CACHE_TTL.DEPLOYMENT,
