@@ -27,6 +27,8 @@ model User {
     subscriptions          Subscription[]
     transactions           Transaction[]
     architectureBlueprints ArchitectureBlueprint[]
+    migrationPlans         MigrationPlan[]
+    codeMigrations         CodeMigration[]
 }
 
 model Project {
@@ -50,6 +52,8 @@ model Project {
     statusMessage          String?
     progress               Int                     @default(0)
     architectureBlueprints ArchitectureBlueprint[]
+    migrationPlans         MigrationPlan[]
+    codeMigrations         CodeMigration[]
 
     @@index([deletedAt])
     @@index([status])
@@ -209,4 +213,66 @@ model Commit {
     commitAuthorAvatar String?
     // AI summary
     summary            String
+}
+
+model MigrationPlan {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    projectId String
+    project   Project @relation(fields: [projectId], references: [id])
+
+    name        String
+    description String
+    type        String
+    status      String
+
+    source Json
+    target Json
+
+    steps    Json
+    risks    Json
+    rollback Json?
+
+    files        Json
+    dependencies Json
+
+    progress     Int     @default(0)
+    currentStep  Int     @default(0)
+    totalSteps   Int     @default(0)
+    errorMessage String?
+
+    githubPrNumber Int?
+    githubBranch   String?
+    githubPrUrl    String?
+
+    userId String
+    user   User   @relation(fields: [userId], references: [id])
+
+    @@index([projectId, status])
+    @@index([projectId, type])
+}
+
+model CodeMigration {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    projectId String
+    project   Project @relation(fields: [projectId], references: [id])
+
+    filePath String
+    original String
+    proposed String
+    type     String
+    status   String
+
+    diff    String?
+    summary String?
+
+    userId String
+    user   User   @relation(fields: [userId], references: [id])
+
+    @@index([projectId, status])
 }

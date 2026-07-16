@@ -27,6 +27,7 @@ import {
   ChevronRight,
   Workflow,
   Rocket,
+  Replace,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -52,6 +53,11 @@ const items = [
     title: `Deployment Check`,
     url: "/deployment",
     icon: Rocket,
+  },
+  {
+    title: `Migration`,
+    url: "/migration",
+    icon: Replace,
   },
   {
     title: `Billing`,

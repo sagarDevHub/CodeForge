@@ -13,7 +13,7 @@ import useProject from "@/hooks/use-project";
 import Image from "next/image";
 import React from "react";
 import MDEditor from "@uiw/react-md-editor";
-import { askCodebaseQuestion } from "./actions/ask-codebase-questions";
+import { askCodebaseQuestion } from "../actions/ask-codebase-questions";
 import CodeReferences from "./code-references";
 import { api } from "@/trpc/react";
 import { toast } from "sonner";

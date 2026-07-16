@@ -6,11 +6,11 @@ import useProject from "@/hooks/use-project";
 import { FaGithub } from "react-icons/fa";
 import { ExternalLink, GitBranch } from "lucide-react";
 import Link from "next/link";
-import CommitLog from "./commit-log";
-import AskQuestionCard from "./ask-question-card";
-import ArchiveButton from "./archive-button";
-import InviteButton from "./invite-button";
-import TeamMembers from "./team-members";
+import CommitLog from "./components/commit-log";
+import AskQuestionCard from "./components/ask-question-card";
+import ArchiveButton from "./components/archive-button";
+import InviteButton from "./components/invite-button";
+import TeamMembers from "./components/team-members";
 
 <FaGithub className="h-5 w-5" />;
 const DashboardPage = () => {

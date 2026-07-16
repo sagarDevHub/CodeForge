@@ -6,9 +6,9 @@ import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import useProject from "@/hooks/use-project";
 import { api } from "@/trpc/react";
 import React, { useState, useMemo } from "react";
-import AskQuestionCard from "../dashboard/ask-question-card";
+import AskQuestionCard from "../dashboard/components/ask-question-card";
 import MDEditor from "@uiw/react-md-editor";
-import CodeReferences from "../dashboard/code-references";
+import CodeReferences from "../dashboard/components/code-references";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
