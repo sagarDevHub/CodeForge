@@ -278,6 +278,7 @@ export function MigrationAssistant({ projectId }: { projectId: string }) {
       <MigrationConfig
         onAnalyze={handleAnalyze}
         isAnalyzing={analyzeMutation.isPending}
+        projectId={projectId}
       />
 
       {/* Migration Plan */}

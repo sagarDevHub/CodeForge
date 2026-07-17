@@ -1,3 +1,5 @@
+import { MigrationActions } from "./components";
+
 export interface MigrationStep {
   order: number;
   title: string;
@@ -45,6 +47,7 @@ export type MigrationType =
   | "language"
   | "architecture"
   | "refactor";
+
 export type MigrationStatus =
   | "draft"
   | "ready"
@@ -52,3 +55,30 @@ export type MigrationStatus =
   | "completed"
   | "failed"
   | "rolled_back";
+
+export interface DetectedStack {
+  framework: string;
+  frameworkVersion: string;
+  language: string;
+  bundler: string;
+  database: string;
+  auth: string;
+  ui: string;
+  stateManagement: string;
+  testing: string[];
+  otherDetected: string[];
+  confidence: number;
+}
+
+export interface MigrationSuggestion {
+  name: string;
+  description: string;
+  from: string;
+  to: string;
+  type: "framework" | "language" | "architecture" | "tool";
+  complexity: "low" | "medium" | "high";
+  benefits: string[];
+  risks: string[];
+  estimatedTime: string;
+  popularity: number;
+}

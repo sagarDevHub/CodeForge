@@ -1,12 +1,14 @@
-// src/server/api/routers/migration.ts
-
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { db } from "@/server/db";
 import { CacheService } from "@/lib/services/cache-service";
 import { cacheKeys, CACHE_TTL } from "@/lib/redis/client";
-import { analyzeMigration } from "@/lib/ai/migration-engine";
+import {
+  analyzeProjectMigration,
+  detectTechStack,
+  getMigrationSuggestions,
+} from "@/lib/ai/migration-engine";
 import { GitHubMigrationService } from "@/lib/services/migration-service";
 
 export const migrationRouter = createTRPCRouter({
@@ -48,7 +50,7 @@ export const migrationRouter = createTRPCRouter({
           cacheKey,
           async () => {
             console.log("🔄 Generating fresh migration analysis...");
-            return await analyzeMigration(projectId, target, type);
+            return await analyzeProjectMigration(projectId, target, type);
           },
           {
             ttl: CACHE_TTL.MIGRATION_ANALYSIS,
@@ -389,5 +391,58 @@ export const migrationRouter = createTRPCRouter({
       await CacheService.invalidate(`migration:plans:${projectId}`);
 
       return result;
+    }),
+
+  detectStack: protectedProcedure
+    .input(z.object({ projectId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const { projectId } = input;
+      const userId = ctx.user.userId!;
+
+      const access = await db.userToProject.findUnique({
+        where: { userId_projectId: { userId, projectId } },
+      });
+
+      if (!access) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Access denied" });
+      }
+
+      const cacheKey = `stack:${projectId}`;
+
+      return await CacheService.getOrSet(
+        cacheKey,
+        async () => {
+          return await detectTechStack(projectId);
+        },
+        { ttl: CACHE_TTL.MIGRATION_ANALYSIS },
+      );
+    }),
+
+  getSuggestions: protectedProcedure
+    .input(z.object({ projectId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const { projectId } = input;
+      const userId = ctx.user.userId!;
+
+      const access = await db.userToProject.findUnique({
+        where: { userId_projectId: { userId, projectId } },
+      });
+
+      if (!access) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Access denied" });
+      }
+
+      const cacheKey = `suggestions:${projectId}`;
+
+      return await CacheService.getOrSet(
+        cacheKey,
+        async () => {
+          const stack = await detectTechStack(projectId);
+          return await getMigrationSuggestions(projectId, stack);
+        },
+        {
+          ttl: CACHE_TTL.MIGRATION_ANALYSIS,
+        },
+      );
     }),
 });
